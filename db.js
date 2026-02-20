@@ -1,8 +1,4 @@
 const mysql = require('mysql2/promise');
-const dotenv = require('dotenv');
-
-// Cargar variables de entorno
-dotenv.config();
 
 // Crear el Pool de conexiones
 // Usamos un Pool porque es más eficiente: mantiene varias conexiones abiertas
