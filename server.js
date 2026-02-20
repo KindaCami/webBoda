@@ -1,5 +1,6 @@
-const dotenv = require('dotenv');
-dotenv.config();
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
 
 const express = require('express');
 const path = require('path');
@@ -19,9 +20,9 @@ app.use(session({
     saveUninitialized: false,
     cookie: { secure: false }
 }));
-app.use(express.urlencoded({ extended: true })); // leer formularios POST
-app.use(express.json());                          // leer JSON (fetch/axios)
-app.use(express.static(path.join(__dirname, 'public'))); // CSS, imágenes, Phaser
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // 3. Rutas — DESPUÉS de los parsers
 app.use('/game',  require('./routes/gameRoutes'));
