@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= titulo %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html {
+            width: 100%; height: 100%; overflow: hidden; background: #000;
+            font-family: 'Inter', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            animation: fadeIn 1.5s ease forwards;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .status-bar {
+            position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 460px; padding: 0 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.65rem; letter-spacing: 0.15em;
+            color: rgba(255,255,255,0.35);
+        }
+        .status-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #00ff88; box-shadow: 0 0 8px #00ff88;
+            display: inline-block; margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        .card-wrapper {
+            position: relative; width: 100%; max-width: 460px; padding: 20px;
+        }
+        .corner {
+            position: absolute; width: 12px; height: 12px;
+            border-color: rgba(0,255,136,0.4); border-style: solid;
+        }
+        .corner-tl { top: 19px; left: 19px; border-width: 2px 0 0 2px; }
+        .corner-tr { top: 19px; right: 19px; border-width: 2px 2px 0 0; }
+        .corner-bl { bottom: 19px; left: 19px; border-width: 0 0 2px 2px; }
+        .corner-br { bottom: 19px; right: 19px; border-width: 0 2px 2px 0; }
+
+        .card {
+            background: rgba(8, 8, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px; overflow: hidden;
+            box-shadow: 0 0 0 1px rgba(0,255,136,0.05), 0 30px 80px rgba(0,0,0,0.8);
+        }
+        .card-accent { height: 3px; background: linear-gradient(90deg, #00ff88, #0088ff, #ff00cc); }
+        .card-body { padding: 44px 40px 40px; }
+
+        .brand {
+            font-family: 'Orbitron', monospace; font-size: 0.7rem; font-weight: 700;
+            letter-spacing: 0.3em; text-transform: uppercase; color: #00ff88; margin-bottom: 24px;
+        }
+        h1 { font-family: 'Orbitron', monospace; font-size: 2.1rem; font-weight: 900; line-height: 1.1; color: #fff; margin-bottom: 8px; }
+        h1 span { color: #00ff88; }
+        .subtitle { font-size: 0.875rem; color: rgba(255,255,255,0.45); margin-bottom: 36px; font-weight: 300; }
+
+        .field { margin-bottom: 12px; }
+        label {
+            display: block; font-family: 'Orbitron', monospace;
+            font-size: 0.6rem; letter-spacing: 0.2em; color: rgba(255,255,255,0.4);
+            margin-bottom: 8px; text-transform: uppercase;
+        }
+        input[type="text"] {
+            width: 100%; background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
+            padding: 14px 16px; color: #fff; font-family: 'Orbitron', monospace;
+            font-size: 1rem; letter-spacing: 0.25em; text-transform: uppercase; outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input[type="text"]:focus {
+            border-color: rgba(0,255,136,0.5);
+            box-shadow: 0 0 0 3px rgba(0,255,136,0.08);
+        }
+        button[type="submit"] {
+            width: 100%; margin-top: 20px; padding: 15px 24px;
+            background: #00ff88; color: #000; font-family: 'Orbitron', monospace;
+            font-size: 0.8rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+            border: none; border-radius: 4px; cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+            box-shadow: 0 0 20px rgba(0,255,136,0.25);
+        }
+        button[type="submit"]:hover { background: #33ffaa; box-shadow: 0 0 30px rgba(0,255,136,0.45); }
+        button[type="submit"]:active { transform: scale(0.98); }
+
+        .error-msg {
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(255,60,60,0.08); border: 1px solid rgba(255,60,60,0.25);
+            border-left: 3px solid #ff3c3c; border-radius: 4px;
+            padding: 12px 14px; margin-bottom: 20px; color: #ff7070; font-size: 0.82rem;
+        }
+        .card-footer {
+            padding: 16px 40px; border-top: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.72rem; color: rgba(255,255,255,0.2); text-align: center;
+        }
+
+        /* Fondo con partículas sutiles */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: -1;
+            background:
+                radial-gradient(ellipse at 30% 40%, rgba(0,255,136,0.03) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 60%, rgba(0,136,255,0.03) 0%, transparent 60%);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="status-bar">
+        <span><span class="status-dot"></span>SISTEMA ACTIVO</span>
+        <span>SECTOR NUPCIAL // 2027</span>
+    </div>
+
+    <div class="card-wrapper">
+        <div class="corner corner-tl"></div>
+        <div class="corner corner-tr"></div>
+        <div class="corner corner-bl"></div>
+        <div class="corner corner-br"></div>
+
+        <div class="card">
+            <div class="card-accent"></div>
+            <div class="card-body">
+                <div class="brand">✦ Acceso de invitados</div>
+                <h1>Cochis<br><span>Boda</span></h1>
+                <p class="subtitle">Introduce tu código para aterrizar</p>
+
+                <% if (error) { %>
+                <div class="error-msg">
+                    <span>⚠</span>
+                    <span><%= error %></span>
+                </div>
+                <% } %>
+
+                <form action="/login" method="POST">
+                    <div class="field">
+                        <label for="access_code">Código de acceso</label>
+                        <input type="text" id="access_code" name="access_code"
+                            placeholder="••••••••" autocomplete="off" required>
+                    </div>
+                    <button type="submit">Aterrizar →</button>
+                </form>
+            </div>
+            <div class="card-footer">¿Perdiste tu código? Contacta con los novios</div>
+        </div>
+    </div>
+    <!-- Continuar música desde la intro -->
+<script>
+    window.bgAudio = null;
+
+    (function() {
+        const shouldContinue = localStorage.getItem('audioContinue');
+        const savedTime      = parseFloat(localStorage.getItem('audioTime') || '38');
+        if (!shouldContinue) return;
+
+        localStorage.removeItem('audioContinue');
+        localStorage.removeItem('audioTime');
+
+        window.bgAudio = new Audio('/audio/Aerea.mp3');
+        window.bgAudio.currentTime = isNaN(savedTime) ? 38 : savedTime;
+        window.bgAudio.currentTime += 1;
+        window.bgAudio.volume = 0;
+
+        function fadeIn() {
+            window.bgAudio.play().then(() => {
+                const target = 0.12;
+                const interval = setInterval(() => {
+                    if (window.bgAudio.volume < target - 0.01) {
+                        window.bgAudio.volume = Math.min(target, window.bgAudio.volume + 0.01);
+                    } else {
+                        window.bgAudio.volume = target;
+                        clearInterval(interval);
+                    }
+                }, 80);
+            }).catch(() => {});
+        }
+
+        window.bgAudio.play().then(() => { window.bgAudio.pause(); fadeIn(); })
+        .catch(() => {
+            document.addEventListener('click',      fadeIn, { once: true });
+            document.addEventListener('keydown',    fadeIn, { once: true });
+            document.addEventListener('touchstart', fadeIn, { once: true });
+        });
+    })();
+
+    // Guardar posición al enviar el formulario
+    document.querySelector('form').addEventListener('submit', () => {
+        if (window.bgAudio && !window.bgAudio.paused) {
+            localStorage.setItem('audioTime2',    window.bgAudio.currentTime.toString());
+            localStorage.setItem('audioDashboard', '1');
+        }
+    });
+</script>
+
+<script>
+    // Si pulsan atrás desde el formulario, ir al landing (no a la intro)
+    history.pushState(null, null, '/login-form');
+    window.addEventListener('popstate', () => {
+        window.location.href = '/';
+    });
+</script>
+
+</body>
+</html>
+
+</body>
+</html>

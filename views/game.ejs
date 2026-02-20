@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Cuánto los conoces? · Boda Víctor & Camilo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.60.0/phaser.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #000; overflow: hidden;
+            font-family: 'Orbitron', monospace; color: #fff;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            min-height: 100vh;
+            background-image:
+                radial-gradient(ellipse at 20% 30%, rgba(0,255,136,0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(0,136,255,0.04) 0%, transparent 50%);
+        }
+        #game-container { position: relative; }
+        canvas { display: block; border-radius: 8px; }
+
+        /* ── RANKING OVERLAY ── */
+        #ranking-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.92); backdrop-filter: blur(20px);
+            z-index: 100; align-items: center; justify-content: center;
+            flex-direction: column;
+        }
+        #ranking-overlay.open { display: flex; }
+        .ranking-card {
+            background: rgba(8,8,20,0.95); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px; overflow: hidden;
+            width: 90%; max-width: 480px;
+            box-shadow: 0 0 60px rgba(0,255,136,0.1);
+        }
+        .ranking-accent { height: 3px; background: linear-gradient(90deg, #00ff88, #0088ff, #ff00cc); }
+        .ranking-body { padding: 32px; }
+        .ranking-title { font-size: 0.6rem; letter-spacing: 0.3em; color: #00ff88; margin-bottom: 8px; }
+        .ranking-score { font-size: 3rem; font-weight: 900; color: #fff; margin-bottom: 4px; }
+        .ranking-sub { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-bottom: 28px; }
+        .ranking-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+        .ranking-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 14px; border-radius: 4px;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+        }
+        .ranking-row.me { background: rgba(0,255,136,0.07); border-color: rgba(0,255,136,0.2); }
+        .ranking-pos { font-size: 0.65rem; font-weight: 700; color: rgba(255,255,255,0.3); width: 24px; }
+        .ranking-pos.gold   { color: #ffd700; }
+        .ranking-pos.silver { color: #c0c0c0; }
+        .ranking-pos.bronze { color: #cd7f32; }
+        .ranking-name { flex: 1; font-size: 0.8rem; color: #fff; }
+        .ranking-pts { font-size: 0.75rem; color: #00ff88; font-weight: 700; }
+        .ranking-actions { display: flex; gap: 10px; }
+        .btn-ranking {
+            flex: 1; padding: 12px; border-radius: 4px; border: none; cursor: pointer;
+            font-family: 'Orbitron', monospace; font-size: 0.6rem; font-weight: 700;
+            letter-spacing: 0.15em; text-transform: uppercase; transition: background 0.2s;
+        }
+        .btn-play-again { background: #00ff88; color: #000; }
+        .btn-play-again:hover { background: #33ffaa; }
+        .btn-home { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-home:hover { color: #fff; }
+
+        /* ── FORMULARIO NOMBRE ── */
+        #name-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.92); backdrop-filter: blur(20px);
+            z-index: 100; align-items: center; justify-content: center;
+        }
+        #name-overlay.open { display: flex; }
+        .name-card {
+            background: rgba(8,8,20,0.95); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px; overflow: hidden; width: 90%; max-width: 400px;
+        }
+        .name-body { padding: 32px; }
+        .name-title { font-size: 0.6rem; letter-spacing: 0.3em; color: #00ff88; margin-bottom: 12px; }
+        .name-h { font-size: 1.4rem; font-weight: 900; color: #fff; margin-bottom: 6px; }
+        .name-sub { font-size: 0.8rem; color: rgba(255,255,255,0.35); margin-bottom: 24px; font-family: 'Inter', sans-serif; }
+        .name-input {
+            width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px; padding: 12px 16px; color: #fff;
+            font-family: 'Orbitron', monospace; font-size: 0.9rem; outline: none;
+            margin-bottom: 16px; transition: border-color 0.2s;
+        }
+        .name-input:focus { border-color: rgba(0,255,136,0.4); }
+        .name-input::placeholder { color: rgba(255,255,255,0.2); font-size: 0.75rem; }
+        .btn-start {
+            width: 100%; padding: 14px; background: #00ff88; color: #000;
+            font-family: 'Orbitron', monospace; font-size: 0.7rem; font-weight: 700;
+            letter-spacing: 0.2em; text-transform: uppercase; border: none; border-radius: 4px;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .btn-start:hover { background: #33ffaa; }
+    </style>
+</head>
+<body>
+
+<!-- SELECTOR DE INVITADO -->
+<div id="name-overlay" class="open">
+    <div class="name-card">
+        <div class="ranking-accent"></div>
+        <div class="name-body">
+            <div class="name-title">✦ MINIJUEGO · BODA 2026/2027</div>
+            <div class="name-h">¿Cuánto los conoces? 🚀</div>
+            <p class="name-sub">10 preguntas sobre Víctor y Camilo. Vidas limitadas, tiempo por pregunta y ranking entre todos los invitados. <strong style="color:#ff00cc">Solo una partida por persona.</strong></p>
+
+            <label class="field-label" style="display:block; font-family:'Orbitron',monospace; font-size:0.55rem; letter-spacing:0.18em; color:rgba(255,255,255,0.3); text-transform:uppercase; margin-bottom:8px;">¿Quién juega?</label>
+            <div id="member-selector" style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
+                <% members.forEach(m => { %>
+                <button class="member-btn" data-id="<%= m.id %>" data-name="<%= m.fullname %>" onclick="seleccionarInvitado(this)"
+                    style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:12px 16px; color:rgba(255,255,255,0.7); font-family:'Orbitron',monospace; font-size:0.7rem; letter-spacing:0.1em; cursor:pointer; text-align:left; transition:all 0.2s;">
+                    👤 <%= m.fullname %>
+                </button>
+                <% }); %>
+            </div>
+
+            <div id="ya-jugo-msg" style="display:none; background:rgba(255,165,0,0.08); border:1px solid rgba(255,165,0,0.2); border-left:3px solid #ffa500; border-radius:3px; padding:12px 16px; font-size:0.8rem; color:#ffa500; margin-bottom:12px; line-height:1.5;">
+                ⚠ Esta persona ya ha jugado. Selecciona otro miembro del grupo.
+            </div>
+
+            <button class="btn-start" id="btn-empezar" onclick="startGame()" disabled style="opacity:0.4; cursor:not-allowed;">
+                Selecciona quién juega →
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- RANKING FINAL -->
+<div id="ranking-overlay">
+    <div class="ranking-card">
+        <div class="ranking-accent"></div>
+        <div class="ranking-body">
+            <div class="ranking-title">✦ PARTIDA TERMINADA</div>
+            <div class="ranking-score" id="final-score">0</div>
+            <div class="ranking-sub" id="final-msg">puntos conseguidos</div>
+            <div class="ranking-list" id="ranking-list"></div>
+            <div class="ranking-actions">
+                <a href="/dashboard" class="btn-ranking btn-home" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;">← Volver al panel</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="game-container"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// PREGUNTAS
+// ══════════════════════════════════════════════════
+const PREGUNTAS = [
+    {
+        texto: "¿Dónde se conocieron Víctor y Camilo?",
+        opciones: ["Sol", "Moncloa", "Gran Vía", "Retiro"],
+        correcta: 1
+    },
+    {
+        texto: "¿A qué restaurante fueron en su primera cita?",
+        opciones: ["Kagura", "Tierra Burrito", "Un sitio de Gyozas", "SUMO"],
+        correcta: 1
+    },
+    {
+        texto: "¿En qué año se conocieron Víctor y Camilo?",
+        opciones: ["2021", "COVID", "2022", "2023"],
+        correcta: 2
+    },
+    {
+        texto: "¿Dónde le pidió Víctor matrimonio a Camilo?",
+        opciones: ["En el Retiro de Madrid", "En la cima del Vesubio", "En la cima del Teide", "Kerepakupai Vená"],
+        correcta: 1
+    },
+    {
+        texto: "¿Qué fecha fue la propuesta de matrimonio?",
+        opciones: ["14 de febrero de 2024", "15 de mayo de 2024", "22 de mayo de 2024", "1 de enero de 2024"],
+        correcta: 1
+    },
+    {
+        texto: "¿Dónde celebraron su rito celta?",
+        opciones: ["Santiago de Compostela", "Lagoa San Martiño", "Cabo Fisterra", "Rías Baixas"],
+        correcta: 1
+    },
+    {
+        texto: "¿De dónde es Camilo?",
+        opciones: ["Miranda, Venezuela", "Anzoategui, Venezuela", "Sucre, Venezuela", "Caracas, Venezuela"],
+        correcta: 2
+    },
+    {
+        texto: "¿A qué se dedica Víctor?",
+        opciones: ["Arquitecto", "Ingeniero aeroespacial", "DJ", "Desarrollador de software"],
+        correcta: 1
+    },
+    {
+        texto: "¿Cuál es el spacecraft favorito de ambos?",
+        opciones: ["Apolo 11", "Voyager II", "Space Shuttle", "ISS"],
+        correcta: 1
+    },
+    {
+        texto: "¿Cuál fue el planeta favorito de ambos en su infancia?",
+        opciones: ["Saturno", "Marte", "Neptuno", "Júpiter"],
+        correcta: 3
+    },
+    {
+        texto: "¿Cuál es el planeta favorito de ambos ahora?",
+        opciones: ["Marte", "Saturno", "La Tierra", "Júpiter"],
+        correcta: 2
+    },
+    {
+        texto: "¿Cuál es el videojuego favorito de Víctor?",
+        opciones: ["The Legend of Zelda: Ocarina of Time", "Age of Empires II", "Cyberpunk 2077", "The Witcher 3"],
+        correcta: 0
+    },
+    {
+        texto: "¿Cuál es la saga favorita de videojuegos de Camilo?",
+        opciones: ["Super Mario", "Grand Theft Auto", "Assassin's Creed", "Battlefront II"],
+        correcta: 2
+    },
+    {
+        texto: "Playa o montaña: ¿qué prefiere Víctor?",
+        opciones: ["Playa", "Montaña", "Los dos igual", "Desierto"],
+        correcta: 1
+    },
+    {
+        texto: "¿Quién es más probable que pierda el móvil?",
+        opciones: ["Víctor", "Camilo", "Los dos igual", "Ninguno"],
+        correcta: 1
+    },
+    {
+        texto: "¿Quién se queda dormido viendo una peli?",
+        opciones: ["Camilo", "Víctor", "Los dos", "Ninguno"],
+        correcta: 1
+    },
+    {
+        texto: "¿Quién dio el primer beso?",
+        opciones: ["Víctor", "Camilo", "Fue simultáneo", "No lo saben"],
+        correcta: 1
+    },
+    {
+        texto: "¿Quién ordena mejor la casa?",
+        opciones: ["Camilo", "Víctor", "Los dos igual", "Ninguno"],
+        correcta: 1
+    },
+    {
+        texto: "¿Quién cocina mejor?",
+        opciones: ["Víctor", "Camilo", "¡Los dos!", "Ninguno"],
+        correcta: 2
+    },
+    {
+        texto: "¿Quién es omnivertido?",
+        opciones: ["Camilo", "Víctor", "Los dos igual", "Depende del día"],
+        correcta: 0
+    },
+    {
+        texto: "¿Quién tiene la familia más grande?",
+        opciones: ["Víctor", "Camilo", "Son iguales", "No tienen familia"],
+        correcta: 1
+    },
+    {
+        // PREGUNTA TRAMPA
+        texto: "¿Quién se aprovechó de quién? 👀",
+        opciones: ["Víctor", "Camilo", "Sioux 🐶", "Ninguno"],
+        correcta: 2,
+        trampa: true,
+        descalificacion: [0, 1]
+    }
+];
+
+// ══════════════════════════════════════════════════
+// ESTADO GLOBAL
+// ══════════════════════════════════════════════════
+let selectedGuestId = null;
+let playerName = '';
+let gameInstance = null;
+let finalScore = 0;
+
+async function seleccionarInvitado(btn) {
+    // Resetear botones
+    document.querySelectorAll('.member-btn').forEach(b => {
+        b.style.background = 'rgba(255,255,255,0.04)';
+        b.style.borderColor = 'rgba(255,255,255,0.1)';
+        b.style.color = 'rgba(255,255,255,0.7)';
+    });
+
+    const guestId = btn.dataset.id;
+    const guestName = btn.dataset.name;
+    document.getElementById('ya-jugo-msg').style.display = 'none';
+
+    // Comprobar si ya jugó
+    const res = await fetch(`/game/check/${guestId}`);
+    const data = await res.json();
+
+    if (data.yaJugo) {
+        btn.style.background = 'rgba(255,165,0,0.08)';
+        btn.style.borderColor = 'rgba(255,165,0,0.3)';
+        btn.style.color = '#ffa500';
+        document.getElementById('ya-jugo-msg').style.display = 'block';
+        document.getElementById('btn-empezar').disabled = true;
+        document.getElementById('btn-empezar').style.opacity = '0.4';
+        document.getElementById('btn-empezar').style.cursor = 'not-allowed';
+        document.getElementById('btn-empezar').textContent = 'Esta persona ya jugó →';
+        selectedGuestId = null;
+    } else {
+        btn.style.background = 'rgba(0,255,136,0.08)';
+        btn.style.borderColor = 'rgba(0,255,136,0.3)';
+        btn.style.color = '#00ff88';
+        selectedGuestId = guestId;
+        playerName = guestName;
+        document.getElementById('btn-empezar').disabled = false;
+        document.getElementById('btn-empezar').style.opacity = '1';
+        document.getElementById('btn-empezar').style.cursor = 'pointer';
+        document.getElementById('btn-empezar').textContent = `¡A jugar, ${guestName.split(' ')[0]}! →`;
+    }
+}
+
+function startGame() {
+    if (!selectedGuestId) return;
+    document.getElementById('name-overlay').classList.remove('open');
+    initPhaser();
+}
+
+// ══════════════════════════════════════════════════
+// PHASER
+// ══════════════════════════════════════════════════
+function initPhaser() {
+    const W = Math.min(window.innerWidth, 700);
+    const H = Math.min(window.innerHeight, 600);
+
+    gameInstance = new Phaser.Game({
+        type: Phaser.AUTO,
+        width: W, height: H,
+        backgroundColor: '#000000',
+        parent: 'game-container',
+        scene: { preload, create, update }
+    });
+}
+
+// ── Variables de escena ──
+let preguntas, preguntaIdx, score, vidas, multiplicador, rachaCorrectas;
+let timerVal, timerMax;
+let textoQ, textosOpc, barraTimer, textoScore, textoVidas, textoMulti;
+let stars = [], particles = [];
+let estado; // 'intro' | 'pregunta' | 'feedback' | 'fin'
+let feedbackTimer = 0;
+let countdownVal = 3;
+let countdownTimer = 0;
+let countdownTxt;
+let shakeTween;
+
+function preload() {}
+
+function create() {
+    const W = this.scale.width;
+    const H = this.scale.height;
+
+    // Fondo estrellado
+    stars = [];
+    for (let i = 0; i < 120; i++) {
+        const x = Phaser.Math.Between(0, W);
+        const y = Phaser.Math.Between(0, H);
+        const r = Math.random() * 1.5 + 0.3;
+        const alpha = Math.random() * 0.6 + 0.2;
+        const s = this.add.circle(x, y, r, 0xffffff, alpha);
+        stars.push({ obj: s, speed: Math.random() * 0.3 + 0.05 });
+    }
+
+    // Estado inicial
+    estado = 'intro';
+    preguntas = Phaser.Utils.Array.Shuffle([...PREGUNTAS]).slice(0, 10);
+    preguntaIdx = 0;
+    score = 0;
+    vidas = 3;
+    multiplicador = 1;
+    rachaCorrectas = 0;
+    timerMax = 10;
+    timerVal = timerMax;
+
+    // ── HUD ──
+    const hudY = 20;
+
+    // Score
+    textoScore = this.add.text(16, hudY, 'SCORE: 0', {
+        fontFamily: 'Orbitron', fontSize: '13px', color: '#00ff88',
+        fontStyle: 'bold'
+    });
+
+    // Vidas
+    textoVidas = this.add.text(W / 2, hudY, '❤️ ❤️ ❤️', {
+        fontFamily: 'Orbitron', fontSize: '14px', color: '#ff4444'
+    }).setOrigin(0.5, 0);
+
+    // Multiplicador
+    textoMulti = this.add.text(W - 16, hudY, 'x1', {
+        fontFamily: 'Orbitron', fontSize: '13px', color: '#ffd700', fontStyle: 'bold'
+    }).setOrigin(1, 0);
+
+    // Barra de tiempo
+    this.add.rectangle(W / 2, 52, W - 32, 6, 0x111122).setOrigin(0.5);
+    barraTimer = this.add.rectangle(16, 52, W - 32, 6, 0x00ff88).setOrigin(0, 0.5);
+
+    // Línea separadora HUD
+    this.add.rectangle(W / 2, 64, W, 1, 0xffffff, 0.06);
+
+    // ── PREGUNTA ──
+    textoQ = this.add.text(W / 2, 100, '', {
+        fontFamily: 'Orbitron', fontSize: '14px', color: '#ffffff',
+        wordWrap: { width: W - 48 }, align: 'center', fontStyle: 'bold',
+        lineSpacing: 6
+    }).setOrigin(0.5, 0).setAlpha(0);
+
+    // ── OPCIONES ──
+    textosOpc = [];
+    const opcY = [200, 280, 360, 440];
+    const scene = this;
+    for (let i = 0; i < 4; i++) {
+        const bg = this.add.rectangle(W / 2, opcY[i], W - 48, 56, 0x0d0d1a)
+            .setStrokeStyle(1, 0x222244).setInteractive().setAlpha(0);
+        const letraChar = ['A', 'B', 'C', 'D'][i];
+        const letraT = this.add.text(W / 2 - (W - 48) / 2 + 20, opcY[i], letraChar, {
+            fontFamily: 'Orbitron', fontSize: '12px', color: '#445566', fontStyle: 'bold'
+        }).setOrigin(0, 0.5).setAlpha(0);
+        const txt = this.add.text(W / 2 - (W - 48) / 2 + 44, opcY[i], '', {
+            fontFamily: 'Inter', fontSize: '13px', color: '#cccccc',
+            wordWrap: { width: W - 48 - 60 }
+        }).setOrigin(0, 0.5).setAlpha(0);
+
+        const idx = i;
+        bg.on('pointerover', () => { if (estado === 'pregunta') bg.setFillStyle(0x111133); });
+        bg.on('pointerout',  () => { if (estado === 'pregunta') bg.setFillStyle(0x0d0d1a); });
+        bg.on('pointerdown', () => { if (estado === 'pregunta') seleccionarOpcion.call(scene, idx); });
+
+        textosOpc.push({ bg, letra: letraT, txt });
+    }
+
+    // ── NÚMERO PREGUNTA ──
+    this.numeroPregunta = this.add.text(W / 2, 78, '', {
+        fontFamily: 'Orbitron', fontSize: '10px', color: 'rgba(255,255,255,0.3)',
+        letterSpacing: 3
+    }).setOrigin(0.5, 0).setAlpha(0);
+
+    // ── COUNTDOWN ──
+    countdownTxt = this.add.text(W / 2, H / 2, '3', {
+        fontFamily: 'Orbitron', fontSize: '80px', color: '#00ff88', fontStyle: 'bold'
+    }).setOrigin(0.5).setAlpha(0);
+
+    countdownVal = 3;
+    countdownTimer = 0;
+    mostrarCountdown.call(this);
+}
+
+function mostrarCountdown() {
+    countdownTxt.setText(countdownVal.toString()).setAlpha(1).setScale(0.5);
+    this.tweens.add({
+        targets: countdownTxt,
+        alpha: { from: 1, to: 0 },
+        scale: { from: 1.5, to: 0.8 },
+        duration: 800,
+        ease: 'Power2'
+    });
+}
+
+function mostrarPregunta() {
+    const W = this.scale.width;
+    const p = preguntas[preguntaIdx];
+    estado = 'pregunta';
+    timerVal = timerMax;
+
+    // Número
+    this.numeroPregunta.setText(`PREGUNTA ${preguntaIdx + 1} / ${preguntas.length}`).setAlpha(1);
+
+    // Texto pregunta
+    textoQ.setText(p.texto).setAlpha(0);
+    this.tweens.add({ targets: textoQ, alpha: 1, duration: 300 });
+
+    // Opciones
+    for (let i = 0; i < 4; i++) {
+        const opc = textosOpc[i];
+        opc.bg.setFillStyle(0x0d0d1a).setStrokeStyle(1, 0x222244).setAlpha(0);
+        opc.letra.setColor('#445566').setAlpha(0);
+        opc.txt.setColor('#cccccc').setText(p.opciones[i]).setAlpha(0);
+        this.tweens.add({ targets: [opc.bg, opc.letra, opc.txt], alpha: 1, duration: 300, delay: 100 + i * 60 });
+    }
+}
+
+function seleccionarOpcion(idx) {
+    if (estado !== 'pregunta') return;
+    estado = 'feedback';
+    feedbackTimer = 0;
+
+    const p = preguntas[preguntaIdx];
+    const correcta = p.correcta;
+    const esCorrecta = idx === correcta;
+
+    // ── DESCALIFICACIÓN (pregunta trampa) ──
+    if (p.trampa && p.descalificacion && p.descalificacion.includes(idx)) {
+        // Resetear todas a neutro
+        for (let i = 0; i < 4; i++) {
+            textosOpc[i].bg.setFillStyle(0x0d0d1a).setStrokeStyle(1, 0x222244);
+            textosOpc[i].txt.setColor('#888899');
+            textosOpc[i].letra.setColor('#445566');
+        }
+        // Marcar en rojo la elegida
+        textosOpc[idx].bg.setFillStyle(0x330000).setStrokeStyle(2, 0xff4444);
+        textosOpc[idx].txt.setColor('#ff4444');
+        textosOpc[idx].letra.setColor('#ff4444');
+        // Mostrar la correcta
+        textosOpc[correcta].bg.setFillStyle(0x003322).setStrokeStyle(2, 0x00ff88);
+        textosOpc[correcta].txt.setColor('#00ff88');
+        textosOpc[correcta].letra.setColor('#00ff88');
+
+        this.cameras.main.shake(600, 0.015);
+        showFloatingText.call(this, '💀 DESCALIFICADO', this.scale.width / 2, 160, '#ff4444');
+
+        // Score a 0, terminar juego tras el feedback
+        score = 0;
+        vidas = 0;
+        actualizarHUD.call(this);
+        return;
+    }
+
+    // Resetear todas a neutro
+    for (let i = 0; i < 4; i++) {
+        textosOpc[i].bg.setFillStyle(0x0d0d1a).setStrokeStyle(1, 0x222244);
+        textosOpc[i].txt.setColor('#888899');
+        textosOpc[i].letra.setColor('#445566');
+    }
+
+    if (esCorrecta) {
+        const pts = Math.round((100 + timerVal * 10) * multiplicador);
+        score += pts;
+        rachaCorrectas++;
+        if (rachaCorrectas >= 3) multiplicador = Math.min(multiplicador + 1, 4);
+
+        textosOpc[idx].bg.setFillStyle(0x003322).setStrokeStyle(2, 0x00ff88);
+        textosOpc[idx].txt.setColor('#00ff88');
+        textosOpc[idx].letra.setColor('#00ff88');
+        spawnParticles.call(this, this.scale.width / 2, 300, 0x00ff88);
+        showFloatingText.call(this, `+${pts}`, this.scale.width / 2, 170, '#00ff88');
+
+        // Si la pregunta trampa tiene correcta == idx (Sioux) — bonus
+        if (p.trampa) {
+            showFloatingText.call(this, '🐶 ¡SIOUX GANA!', this.scale.width / 2, 130, '#ffd700');
+        }
+
+    } else {
+        // Si es la trampa con Ninguno — pasar sin penalización
+        if (p.trampa && idx === 3) {
+            textosOpc[idx].bg.setFillStyle(0x1a1a00).setStrokeStyle(1, 0x666600);
+            textosOpc[idx].txt.setColor('#aaaa00');
+            textosOpc[idx].letra.setColor('#aaaa00');
+            textosOpc[correcta].bg.setFillStyle(0x003322).setStrokeStyle(2, 0x00ff88);
+            textosOpc[correcta].txt.setColor('#00ff88');
+            textosOpc[correcta].letra.setColor('#00ff88');
+            showFloatingText.call(this, '🤔 Hmmm... pasa', this.scale.width / 2, 170, '#aaaa00');
+            actualizarHUD.call(this);
+            // feedbackTimer ya está en 0 y estado en 'feedback', el update() avanzará solo
+            return;
+        }
+
+        vidas--;
+        rachaCorrectas = 0;
+        multiplicador = 1;
+
+        textosOpc[idx].bg.setFillStyle(0x330000).setStrokeStyle(2, 0xff4444);
+        textosOpc[idx].txt.setColor('#ff4444');
+        textosOpc[idx].letra.setColor('#ff4444');
+        textosOpc[correcta].bg.setFillStyle(0x003322).setStrokeStyle(2, 0x00ff88);
+        textosOpc[correcta].txt.setColor('#00ff88');
+        textosOpc[correcta].letra.setColor('#00ff88');
+
+        this.cameras.main.shake(300, 0.008);
+        showFloatingText.call(this, '✗', this.scale.width / 2, 170, '#ff4444');
+    }
+
+    actualizarHUD.call(this);
+}
+
+function actualizarHUD() {
+    textoScore.setText(`SCORE: ${score.toLocaleString()}`);
+    const corazones = '❤️'.repeat(Math.max(0, vidas)) + '🖤'.repeat(Math.max(0, 3 - vidas));
+    textoVidas.setText(corazones);
+    textoMulti.setText(`x${multiplicador}`);
+    textoMulti.setColor(multiplicador >= 3 ? '#ff00cc' : multiplicador >= 2 ? '#ffd700' : '#ffffff');
+}
+
+function showFloatingText(txt, x, y, color) {
+    const t = this.add.text(x, y, txt, {
+        fontFamily: 'Orbitron', fontSize: '22px', color, fontStyle: 'bold'
+    }).setOrigin(0.5);
+    this.tweens.add({
+        targets: t, y: y - 60, alpha: 0, duration: 900,
+        ease: 'Power2', onComplete: () => t.destroy()
+    });
+}
+
+function spawnParticles(x, y, color) {
+    for (let i = 0; i < 12; i++) {
+        const p = this.add.circle(x, y, Phaser.Math.Between(3, 7), color, 1);
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 160 + 60;
+        this.tweens.add({
+            targets: p,
+            x: p.x + Math.cos(angle) * speed,
+            y: p.y + Math.sin(angle) * speed,
+            alpha: 0, scaleX: 0.1, scaleY: 0.1,
+            duration: 600 + Math.random() * 300,
+            ease: 'Power2',
+            onComplete: () => p.destroy()
+        });
+    }
+}
+
+function siguientePregunta() {
+    preguntaIdx++;
+    if (preguntaIdx >= preguntas.length || vidas <= 0) {
+        terminarJuego.call(this);
+    } else {
+        mostrarPregunta.call(this);
+    }
+}
+
+function terminarJuego() {
+    estado = 'fin';
+    finalScore = score;
+    guardarYMostrarRanking.call(this);
+}
+
+async function guardarYMostrarRanking() {
+    try {
+        const res = await fetch('/game/score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ guest_id: selectedGuestId, player_name: playerName, score: finalScore })
+        });
+        const data = await res.json();
+        if (data.ok === false && data.motivo) {
+            console.warn(data.motivo);
+        }
+    } catch(e) { console.log('Error guardando score:', e); }
+
+    // Obtener ranking
+    let ranking = [];
+    try {
+        const res = await fetch('/game/ranking');
+        ranking = await res.json();
+    } catch(e) { ranking = []; }
+
+    // Mostrar overlay
+    document.getElementById('final-score').textContent = finalScore.toLocaleString();
+
+    const msgs = finalScore > 1500 ? '¡Conoces a los novios mejor que ellos mismos! 🏆' :
+                 finalScore > 800  ? '¡Buen trabajo, se nota que los quieres! 💚' :
+                 vidas <= 0        ? 'Sin vidas... ¡vuelve a intentarlo! 💀' :
+                                     '¡Sigue practicando para el día de la boda! 🚀';
+    document.getElementById('final-msg').textContent = msgs;
+
+    const list = document.getElementById('ranking-list');
+    list.innerHTML = '';
+    const posClasses = ['gold', 'silver', 'bronze'];
+    ranking.slice(0, 8).forEach((r, i) => {
+        const isMe = r.player_name === playerName && r.score === finalScore;
+        const div = document.createElement('div');
+        div.className = `ranking-row${isMe ? ' me' : ''}`;
+        const posClass = i < 3 ? posClasses[i] : '';
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
+        div.innerHTML = `
+            <span class="ranking-pos ${posClass}">${medal}</span>
+            <span class="ranking-name">${r.player_name}${isMe ? ' (tú)' : ''}</span>
+            <span class="ranking-pts">${parseInt(r.score).toLocaleString()} pts</span>
+        `;
+        list.appendChild(div);
+    });
+
+    document.getElementById('ranking-overlay').classList.add('open');
+    if (gameInstance) { gameInstance.destroy(true); gameInstance = null; }
+}
+
+function update(time, delta) {
+    const dt = delta / 1000;
+
+    // Estrellas
+    stars.forEach(s => {
+        s.obj.y += s.speed;
+        if (s.obj.y > this.scale.height) s.obj.y = 0;
+    });
+
+    if (estado === 'intro') {
+        countdownTimer += dt;
+        if (countdownTimer >= 1) {
+            countdownTimer = 0;
+            countdownVal--;
+            if (countdownVal <= 0) {
+                countdownTxt.setAlpha(0);
+                estado = 'preguntando';
+                mostrarPregunta.call(this);
+            } else {
+                mostrarCountdown.call(this);
+            }
+        }
+        return;
+    }
+
+    if (estado === 'pregunta') {
+        timerVal -= dt;
+        if (timerVal <= 0) {
+            timerVal = 0;
+            // Tiempo agotado: mostrar respuesta correcta y restar vida
+            estado = 'feedback';
+            feedbackTimer = 0;
+            vidas--;
+            rachaCorrectas = 0;
+            multiplicador = 1;
+            const correcta = preguntas[preguntaIdx].correcta;
+            textosOpc[correcta].bg.setFillStyle(0x003322).setStrokeStyle(2, 0x00ff88);
+            textosOpc[correcta].txt.setColor('#00ff88');
+            textosOpc[correcta].letra.setColor('#00ff88');
+            showFloatingText.call(this, '⏱ TIEMPO', this.scale.width / 2, 160, '#ffa500');
+            this.cameras.main.shake(300, 0.006);
+            actualizarHUD.call(this);
+        }
+        // Barra
+        const W = this.scale.width;
+        const pct = timerVal / timerMax;
+        barraTimer.width = (W - 32) * pct;
+        const col = timerVal > 6 ? 0x00ff88 : timerVal > 3 ? 0xffa500 : 0xff4444;
+        barraTimer.setFillStyle(col);
+        return;
+    }
+
+    if (estado === 'feedback') {
+        feedbackTimer += dt;
+        if (feedbackTimer >= 1.4) {
+            // Ocultar opciones
+            textosOpc.forEach(o => { o.bg.setAlpha(0); o.letra.setAlpha(0); o.txt.setAlpha(0); });
+            textoQ.setAlpha(0);
+            this.numeroPregunta.setAlpha(0);
+            siguientePregunta.call(this);
+        }
+    }
+}
+</script>
+</body>
+</html>
