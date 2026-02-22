@@ -939,5 +939,20 @@ fetch('/game/ranking').then(r=>r.json()).then(ranking => {
         document.querySelectorAll('.timeline-item').forEach(el => observer.observe(el));
     </script>
 
+    <audio id="enyaAudio" loop>
+    <source src="/audio/enya.mp3" type="audio/mpeg">
+</audio>
+<script>
+    //Audio enya caribbean blue
+const enyaAudio = document.getElementById('enyaAudio');
+enyaAudio.volume = 0.25;
+document.addEventListener('click', () => {
+    enyaAudio.play().catch(() => {});
+}, { once: true });
+document.addEventListener('touchstart', () => {
+    enyaAudio.play().catch(() => {});
+}, { once: true });
+</script>
+
 </body>
 </html>

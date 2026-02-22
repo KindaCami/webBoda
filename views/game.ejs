@@ -127,6 +127,7 @@
         </div>
     </div>
 </div>
+<audio id="victory-audio" src="/audio/zeldaopening.mp3" preload="auto"></audio>
 
 <!-- RANKING FINAL -->
 <div id="ranking-overlay">
@@ -625,6 +626,26 @@ function terminarJuego() {
     guardarYMostrarRanking.call(this);
 }
 
+function lanzarCelebracionFinal(puntos) {
+    const audio = document.getElementById('victory-audio');
+    
+    // 1. Configurar música de Zelda
+    audio.volume = 0.8; // Levemente fuerte
+    audio.currentTime = 7; // Empezar en el segundo 7
+    audio.play().catch(e => console.log("Audio bloqueado por el navegador:", e));
+
+    // 2. Hacer que el asistente "diga" los puntos (Text-to-Speech)
+    // Esperamos un poco para que entre la fanfarria de la música
+    setTimeout(() => {
+        const mensaje = new SpeechSynthesisUtterance();
+        mensaje.text = `¡Increíble ${playerName.split(' ')[0]}! Has conseguido ${puntos} puntos.`;
+        mensaje.lang = 'es-ES';
+        mensaje.rate = 1; // Velocidad normal
+        mensaje.pitch = 1; // Tono de voz
+        window.speechSynthesis.speak(mensaje);
+    }, 1500); // 1.5 segundos después de que empiece la música
+}
+
 async function guardarYMostrarRanking() {
     try {
         const res = await fetch('/game/score', {
@@ -647,8 +668,9 @@ async function guardarYMostrarRanking() {
 
     // Mostrar overlay
     document.getElementById('final-score').textContent = finalScore.toLocaleString();
-
-    const msgs = finalScore > 1500 ? '¡Conoces a los novios mejor que ellos mismos! 🏆' :
+    // LLAMADA A LA MÚSICA Y VOZ
+    lanzarCelebracionFinal(finalScore);
+     const msgs = finalScore > 1500 ? '¡Conoces a los novios mejor que ellos mismos! 🏆' :
                  finalScore > 800  ? '¡Buen trabajo, se nota que los quieres! 💚' :
                  vidas <= 0        ? 'Sin vidas... ¡vuelve a intentarlo! 💀' :
                                      '¡Sigue practicando para el día de la boda! 🚀';
