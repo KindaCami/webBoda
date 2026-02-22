@@ -943,38 +943,15 @@ fetch('/game/ranking').then(r=>r.json()).then(ranking => {
     <source src="/audio/enya.mp3" type="audio/mpeg">
 </audio>
 <script>
-    const enyaAudio = document.getElementById('enyaAudio');
-    
-    // Configuramos el inicio
-    enyaAudio.muted = false; 
-    enyaAudio.volume = 0; // Empezamos en 0 para el fade-in
-
-    const iniciarMusica = () => {
-        enyaAudio.play().then(() => {
-            // Una vez que empieza a sonar, subimos el volumen gradualmente
-            let vol = 0;
-            const fadeIn = setInterval(() => {
-                if (vol < 0.50) { // Tu volumen deseado
-                    vol += 0.05;
-                    enyaAudio.volume = vol.toFixed(2);
-                } else {
-                    clearInterval(fadeIn);
-                }
-            }, 200); // Sube un poco de volumen cada 200ms
-        }).catch(error => {
-            console.log("Esperando interacción real...");
-        });
-
-        // IMPORTANTE: Quitamos todos los escuchadores una vez que suene
-        ['click', 'touchstart', 'scroll', 'wheel', 'touchmove'].forEach(evt => {
-            document.removeEventListener(evt, iniciarMusica);
-        });
-    };
-
-    // Escuchamos cualquier movimiento para activar el audio
-    ['click', 'touchstart', 'scroll', 'wheel', 'touchmove'].forEach(evt => {
-        document.addEventListener(evt, iniciarMusica, { once: true });
-    });
+    //Audio enya caribbean blue
+const enyaAudio = document.getElementById('enyaAudio');
+enyaAudio.volume = 0.50;
+document.addEventListener('click', () => {
+    enyaAudio.play().catch(() => {});
+}, { once: true });
+document.addEventListener('touchstart', () => {
+    enyaAudio.play().catch(() => {});
+}, { once: true });
 </script>
 
 </body>
