@@ -153,6 +153,9 @@ const emailConfirmacion2026 = (nombreGrupo, members) => {
             <thead><tr><th>Invitado</th><th>Asiste</th><th>Menú</th></tr></thead>
             <tbody>${filas}</tbody>
         </table>
+        <div style="background:rgba(0,136,255,0.07); border:1px solid rgba(0,136,255,0.15); border-left:3px solid #0088ff; border-radius:3px; padding:12px 16px; margin-top:16px; font-size:13px; color:rgba(255,255,255,0.6); line-height:1.6;">
+    📨 <strong style="color:#0088ff">Por favor, reenvía este correo</strong> a los demás integrantes de tu grupo.
+        </div>
         ${calendarButtons('Ceremonia Civil · Plaza Mayor', googleUrl, outlookUrl)}
         <p class="note">Puedes modificar tu confirmación en cualquier momento accediendo con tu código.</p>
     `);
@@ -204,6 +207,9 @@ const emailConfirmacion2027 = (nombreGrupo, members) => {
             <strong style="color:#ffa500">⏳ Lista de espera</strong><br>
             <span style="font-size:13px; color:rgba(255,255,255,0.5)">Las plazas de alojamiento están completas. Os avisaremos en cuanto se libere una plaza.</span>
         </div>` : ''}
+        <div style="background:rgba(0,136,255,0.07); border:1px solid rgba(0,136,255,0.15); border-left:3px solid #0088ff; border-radius:3px; padding:12px 16px; margin-top:16px; font-size:13px; color:rgba(255,255,255,0.6); line-height:1.6;">
+    📨 <strong style="color:#0088ff">Por favor, reenvía este correo</strong> a los demás integrantes de tu grupo.
+        </div>
         ${calendarButtons('Fin de Semana Boda · Tejera Negra', googleUrl, outlookUrl)}
         <p class="note">Puedes modificar tu confirmación en cualquier momento accediendo con tu código.</p>
     `);
@@ -261,7 +267,7 @@ const enviarEmails = async (grupo, members) => {
 
     if (emailGrupo && hay2026) {
         envios.push(transporter.sendMail({
-            from: `"Nuestra Boda 💛" <${process.env.EMAIL_USER}>`,
+            from: `"Boda de Camilo y Victor 💛" <${process.env.EMAIL_USER}>`,
             to: emailGrupo,
             subject: '✓ Confirmación Ceremonia · 22 Mayo 2026 · Plaza Mayor',
             html: emailConfirmacion2026(grupo.name, members)
@@ -270,7 +276,7 @@ const enviarEmails = async (grupo, members) => {
 
     if (emailGrupo && hay2027) {
         envios.push(transporter.sendMail({
-            from: `"Nuestra Boda 💚" <${process.env.EMAIL_USER}>`,
+            from: `"Boda de Camilo y Victor 💚" <${process.env.EMAIL_USER}>`,
             to: emailGrupo,
             subject: '✓ Confirmación Fin de Semana · Mayo 2027 · Tejera Negra',
             html: emailConfirmacion2027(grupo.name, members)
@@ -278,7 +284,7 @@ const enviarEmails = async (grupo, members) => {
     }
 
     envios.push(transporter.sendMail({
-        from: `"Nuestra Boda 💜" <${process.env.EMAIL_USER}>`,
+        from: `"Boda de Camilo y Victor 💜" <${process.env.EMAIL_USER}>`,
         to: process.env.EMAIL_NOVIOS,
         subject: `📋 ${grupo.name} ha actualizado su confirmación`,
         html: emailResumenNovios(grupo.name, members)
