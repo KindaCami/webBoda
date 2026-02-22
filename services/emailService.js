@@ -1,37 +1,19 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// ── TRANSPORTE ──
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ── HELPERS CALENDARIO ──
 const formatICSDate = (date) => date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 
 const googleCalendarLink = (title, start, end, location, description) => {
     const base = 'https://calendar.google.com/calendar/render?action=TEMPLATE';
-    const params = new URLSearchParams({
-        text: title,
-        dates: `${formatICSDate(start)}/${formatICSDate(end)}`,
-        location,
-        details: description
-    });
+    const params = new URLSearchParams({ text: title, dates: `${formatICSDate(start)}/${formatICSDate(end)}`, location, details: description });
     return `${base}&${params.toString()}`;
 };
 
 const outlookCalendarLink = (title, start, end, location, description) => {
     const base = 'https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent';
-    const params = new URLSearchParams({
-        subject: title,
-        startdt: start.toISOString(),
-        enddt: end.toISOString(),
-        location,
-        body: description
-    });
+    const params = new URLSearchParams({ subject: title, startdt: start.toISOString(), enddt: end.toISOString(), location, body: description });
     return `${base}&${params.toString()}`;
 };
 
@@ -39,18 +21,16 @@ const calendarButtons = (titulo, googleUrl, outlookUrl) => `
     <div style="margin-top:20px; margin-bottom:8px;">
         <p style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.3); font-family:monospace; margin-bottom:12px;">📅 Añadir a tu calendario</p>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <a href="${googleUrl}" target="_blank"
-               style="display:inline-block; background:rgba(0,136,255,0.15); color:#0088ff; border:1px solid rgba(0,136,255,0.3); border-radius:3px; padding:8px 16px; font-size:12px; font-family:monospace; text-decoration:none; letter-spacing:1px;">
-                📅 Google Calendar
-            </a>
-            <a href="${outlookUrl}" target="_blank"
-               style="display:inline-block; background:rgba(0,120,212,0.15); color:#74b9ff; border:1px solid rgba(0,120,212,0.3); border-radius:3px; padding:8px 16px; font-size:12px; font-family:monospace; text-decoration:none; letter-spacing:1px;">
-                📅 Outlook
-            </a>
+            <a href="${googleUrl}" target="_blank" style="display:inline-block; background:rgba(0,136,255,0.15); color:#0088ff; border:1px solid rgba(0,136,255,0.3); border-radius:3px; padding:8px 16px; font-size:12px; font-family:monospace; text-decoration:none; letter-spacing:1px;">📅 Google Calendar</a>
+            <a href="${outlookUrl}" target="_blank" style="display:inline-block; background:rgba(0,120,212,0.15); color:#74b9ff; border:1px solid rgba(0,120,212,0.3); border-radius:3px; padding:8px 16px; font-size:12px; font-family:monospace; text-decoration:none; letter-spacing:1px;">📅 Outlook</a>
         </div>
         <p style="font-size:11px; color:rgba(255,255,255,0.2); margin-top:8px; font-style:italic;">Para Apple Calendar, guarda este email y ábrelo desde tu iPhone o Mac.</p>
-    </div>
-`;
+    </div>`;
+
+const reenvioMsg = `
+    <div style="background:rgba(0,136,255,0.07); border:1px solid rgba(0,136,255,0.15); border-left:3px solid #0088ff; border-radius:3px; padding:12px 16px; margin-top:16px; font-size:13px; color:rgba(255,255,255,0.6); line-height:1.6;">
+        📨 <strong style="color:#0088ff">Por favor, reenvía este correo</strong> a los demás integrantes de tu grupo que no lo hayan recibido.
+    </div>`;
 
 // ── BASE HTML ──
 const emailBase = (accentColor, contenido) => `
@@ -79,7 +59,6 @@ const emailBase = (accentColor, contenido) => `
         td:last-child { text-align: right; }
         .badge-si   { display:inline-block; background:rgba(0,255,136,0.12); color:#00ff88; border:1px solid rgba(0,255,136,0.2); font-size:11px; padding:2px 8px; border-radius:3px; font-weight:600; }
         .badge-no   { display:inline-block; background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.25); border:1px solid rgba(255,255,255,0.08); font-size:11px; padding:2px 8px; border-radius:3px; }
-        .badge-wait { display:inline-block; background:rgba(255,165,0,0.12); color:#ffa500; border:1px solid rgba(255,165,0,0.2); font-size:11px; padding:2px 8px; border-radius:3px; }
         .badge-menu { display:inline-block; background:rgba(0,136,255,0.12); color:#0088ff; border:1px solid rgba(0,136,255,0.2); font-size:11px; padding:2px 8px; border-radius:3px; }
         .footer { padding: 20px 32px; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; }
         .footer p { font-size: 12px; color: rgba(255,255,255,0.2); line-height: 1.6; }
@@ -94,7 +73,7 @@ const emailBase = (accentColor, contenido) => `
             <div class="card-body">${contenido}</div>
             <div class="footer">
                 <div class="hearts">♥ ♥</div>
-                <p>Nuestra Boda · 2026 / 2027<br>Plaza Mayor, Madrid &amp; Aldea Tejera Negra, Guadalajara</p>
+                <p>Boda Camilo y Víctor · 2026 / 2027<br>Plaza Mayor, Madrid &amp; Aldea Tejera Negra, Guadalajara</p>
             </div>
         </div>
     </div>
@@ -107,11 +86,7 @@ const noche = (v) => v ? '<span class="badge-si">🛏 Sí</span>' : '<span class
 const asiste2026 = (members) => members.some(m => m.attending_ceremony_2026);
 const asiste2027 = (members) => members.some(m => m.attending_friday_2027 || m.attending_saturday_2027 || m.attending_sunday_2027);
 
-// ── FECHAS DE LOS EVENTOS ──
-const fecha2026 = {
-    start: new Date('2026-05-22T12:00:00Z'),
-    end:   new Date('2026-05-22T22:00:00Z')
-};
+const fecha2026 = { start: new Date('2026-05-22T12:00:00Z'), end: new Date('2026-05-22T22:00:00Z') };
 const fecha2027inicio = new Date('2027-05-21T18:00:00Z');
 const fecha2027fin    = new Date('2027-05-23T14:00:00Z');
 
@@ -124,24 +99,13 @@ const emailConfirmacion2026 = (nombreGrupo, members) => {
             <td>${g.fullname}</td>
             <td>${yn(g.attending_ceremony_2026)}</td>
             <td><span class="badge-menu">${g.menu_type || 'estándar'}</span></td>
-        </tr>
-    `).join('');
+        </tr>`).join('');
 
-    const googleUrl  = googleCalendarLink(
-        'Nuestra Boda · Ceremonia Civil',
-        fecha2026.start, fecha2026.end,
-        'Plaza Mayor, Madrid',
-        `Ceremonia civil de nuestra boda. Grupo: ${nombreGrupo}`
-    );
-    const outlookUrl = outlookCalendarLink(
-        'Nuestra Boda · Ceremonia Civil',
-        fecha2026.start, fecha2026.end,
-        'Plaza Mayor, Madrid',
-        `Ceremonia civil de nuestra boda. Grupo: ${nombreGrupo}`
-    );
+    const googleUrl  = googleCalendarLink('Boda Camilo y Víctor · Ceremonia Civil', fecha2026.start, fecha2026.end, 'Plaza Mayor, Madrid', `Ceremonia civil. Grupo: ${nombreGrupo}`);
+    const outlookUrl = outlookCalendarLink('Boda Camilo y Víctor · Ceremonia Civil', fecha2026.start, fecha2026.end, 'Plaza Mayor, Madrid', `Ceremonia civil. Grupo: ${nombreGrupo}`);
 
     return emailBase('linear-gradient(90deg, #ffd700, #ffaa00)', `
-        <div class="brand">✦ Confirmación · Ceremonia 2026</div>
+        <div class="brand">✦ Boda Camilo y Víctor · Ceremonia 2026</div>
         <h1>¡Nos vemos en<br>Plaza Mayor! 🏛️</h1>
         <p class="subtitle">Hemos recibido tu confirmación para la ceremonia civil del 22 de mayo de 2026.</p>
         <div class="divider"></div>
@@ -153,9 +117,7 @@ const emailConfirmacion2026 = (nombreGrupo, members) => {
             <thead><tr><th>Invitado</th><th>Asiste</th><th>Menú</th></tr></thead>
             <tbody>${filas}</tbody>
         </table>
-        <div style="background:rgba(0,136,255,0.07); border:1px solid rgba(0,136,255,0.15); border-left:3px solid #0088ff; border-radius:3px; padding:12px 16px; margin-top:16px; font-size:13px; color:rgba(255,255,255,0.6); line-height:1.6;">
-    📨 <strong style="color:#0088ff">Por favor, reenvía este correo</strong> a los demás integrantes de tu grupo.
-        </div>
+        ${reenvioMsg}
         ${calendarButtons('Ceremonia Civil · Plaza Mayor', googleUrl, outlookUrl)}
         <p class="note">Puedes modificar tu confirmación en cualquier momento accediendo con tu código.</p>
     `);
@@ -172,26 +134,14 @@ const emailConfirmacion2027 = (nombreGrupo, members) => {
             <td>${yn(g.attending_saturday_2027)}</td>
             <td>${yn(g.attending_sunday_2027)}</td>
             <td>${noche(g.accommodation_friday)}${noche(g.accommodation_saturday)}${noche(g.accommodation_sunday)}</td>
-        </tr>
-    `).join('');
+        </tr>`).join('');
 
     const enEspera = members.some(m => m.accommodation_status === 'waiting_list');
-
-    const googleUrl  = googleCalendarLink(
-        'Nuestra Boda · Fin de Semana Tejera Negra',
-        fecha2027inicio, fecha2027fin,
-        'Aldea Tejera Negra, Campillo de Ranas, Guadalajara',
-        `Fin de semana de boda. Viernes cena, sábado ceremonia y fiesta, domingo brunch. Grupo: ${nombreGrupo}`
-    );
-    const outlookUrl = outlookCalendarLink(
-        'Nuestra Boda · Fin de Semana Tejera Negra',
-        fecha2027inicio, fecha2027fin,
-        'Aldea Tejera Negra, Campillo de Ranas, Guadalajara',
-        `Fin de semana de boda. Viernes cena, sábado ceremonia y fiesta, domingo brunch. Grupo: ${nombreGrupo}`
-    );
+    const googleUrl  = googleCalendarLink('Boda Camilo y Víctor · Fin de Semana Tejera Negra', fecha2027inicio, fecha2027fin, 'Aldea Tejera Negra, Campillo de Ranas, Guadalajara', `Fin de semana de boda. Grupo: ${nombreGrupo}`);
+    const outlookUrl = outlookCalendarLink('Boda Camilo y Víctor · Fin de Semana Tejera Negra', fecha2027inicio, fecha2027fin, 'Aldea Tejera Negra, Campillo de Ranas, Guadalajara', `Fin de semana de boda. Grupo: ${nombreGrupo}`);
 
     return emailBase('linear-gradient(90deg, #00ff88, #0088ff, #ff00cc)', `
-        <div class="brand">✦ Confirmación · Fin de semana 2027</div>
+        <div class="brand">✦ Boda Camilo y Víctor · Fin de semana 2027</div>
         <h1>¡Nos vemos en<br>Tejera Negra! 🌲</h1>
         <p class="subtitle">Hemos recibido tu confirmación para el fin de semana del 21-23 de mayo de 2027.</p>
         <div class="divider"></div>
@@ -207,9 +157,7 @@ const emailConfirmacion2027 = (nombreGrupo, members) => {
             <strong style="color:#ffa500">⏳ Lista de espera</strong><br>
             <span style="font-size:13px; color:rgba(255,255,255,0.5)">Las plazas de alojamiento están completas. Os avisaremos en cuanto se libere una plaza.</span>
         </div>` : ''}
-        <div style="background:rgba(0,136,255,0.07); border:1px solid rgba(0,136,255,0.15); border-left:3px solid #0088ff; border-radius:3px; padding:12px 16px; margin-top:16px; font-size:13px; color:rgba(255,255,255,0.6); line-height:1.6;">
-    📨 <strong style="color:#0088ff">Por favor, reenvía este correo</strong> a los demás integrantes de tu grupo.
-        </div>
+        ${reenvioMsg}
         ${calendarButtons('Fin de Semana Boda · Tejera Negra', googleUrl, outlookUrl)}
         <p class="note">Puedes modificar tu confirmación en cualquier momento accediendo con tu código.</p>
     `);
@@ -229,22 +177,18 @@ const emailResumenNovios = (nombreGrupo, members) => {
             <td>${noche(g.accommodation_friday)}${noche(g.accommodation_saturday)}${noche(g.accommodation_sunday)}</td>
             <td><span class="badge-menu">${g.menu_type || 'estándar'}</span></td>
             <td style="font-size:11px; color:rgba(255,255,255,0.4)">${g.allergies_specifications || '—'}</td>
-        </tr>
-    `).join('');
+        </tr>`).join('');
 
     const enEspera = members.filter(m => m.accommodation_status === 'waiting_list');
 
     return emailBase('linear-gradient(90deg, #ff00cc, #0088ff)', `
-        <div class="brand">✦ Actualización de invitado</div>
+        <div class="brand">✦ Boda Camilo y Víctor · Actualización</div>
         <h1>El grupo <span style="color:#00ff88">${nombreGrupo}</span><br>ha confirmado asistencia</h1>
         <p class="subtitle">${new Date().toLocaleString('es-ES', { dateStyle: 'full', timeStyle: 'short' })}</p>
         <div class="divider"></div>
         <table>
             <thead>
-                <tr>
-                    <th>Nombre</th><th>Cer'26</th><th>Vie'27</th><th>Sáb'27</th><th>Dom'27</th>
-                    <th>Noches</th><th>Menú</th><th>Alergias</th>
-                </tr>
+                <tr><th>Nombre</th><th>Cer'26</th><th>Vie'27</th><th>Sáb'27</th><th>Dom'27</th><th>Noches</th><th>Menú</th><th>Alergias</th></tr>
             </thead>
             <tbody>${filas}</tbody>
         </table>
@@ -263,37 +207,39 @@ const enviarEmails = async (grupo, members) => {
     const hay2026 = asiste2026(members);
     const hay2027 = asiste2027(members);
 
+    console.log('EMAIL DEBUG:', { emailGrupo, hay2026, hay2027 });
+
     const envios = [];
 
     if (emailGrupo && hay2026) {
-        envios.push(transporter.sendMail({
-            from: `"Boda de Camilo y Victor 💛" <${process.env.EMAIL_USER}>`,
+        envios.push(resend.emails.send({
+            from: 'Boda Camilo y Víctor <hola@bodacamiloyvictor.com>',
             to: emailGrupo,
-            subject: '✓ Confirmación Ceremonia · 22 Mayo 2026 · Plaza Mayor',
+            subject: 'Boda Camilo y Víctor · Confirmación Ceremonia 22 Mayo 2026',
             html: emailConfirmacion2026(grupo.name, members)
         }));
     }
 
     if (emailGrupo && hay2027) {
-        envios.push(transporter.sendMail({
-            from: `"Boda de Camilo y Victor 💚" <${process.env.EMAIL_USER}>`,
+        envios.push(resend.emails.send({
+            from: 'Boda Camilo y Víctor <hola@bodacamiloyvictor.com>',
             to: emailGrupo,
-            subject: '✓ Confirmación Fin de Semana · Mayo 2027 · Tejera Negra',
+            subject: 'Boda Camilo y Víctor · Confirmación Fin de Semana Mayo 2027',
             html: emailConfirmacion2027(grupo.name, members)
         }));
     }
 
-    envios.push(transporter.sendMail({
-        from: `"Boda de Camilo y Victor 💜" <${process.env.EMAIL_USER}>`,
+    envios.push(resend.emails.send({
+        from: 'Boda Camilo y Víctor <hola@bodacamiloyvictor.com>',
         to: process.env.EMAIL_NOVIOS,
-        subject: `📋 ${grupo.name} ha actualizado su confirmación`,
+        subject: `Boda Camilo y Víctor · ${grupo.name} ha confirmado`,
         html: emailResumenNovios(grupo.name, members)
     }));
 
     const results = await Promise.allSettled(envios);
     results.forEach((r, i) => {
-        if (r.status === 'rejected') console.error(`Error email ${i}:`, r.reason.message);
-        else console.log(`✓ Email ${i} enviado`);
+        if (r.status === 'rejected') console.error(`Error email ${i}:`, r.reason?.message || r.reason);
+        else console.log(`✓ Email ${i} enviado:`, r.value?.data?.id || 'ok');
     });
 };
 
