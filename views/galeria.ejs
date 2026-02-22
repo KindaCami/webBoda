@@ -3,257 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camilo & Víctor · Gracias</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Orbitron:wght@300;400&display=swap" rel="stylesheet">
+    <title>Gracias · Boda Víctor & Camilo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Orbitron:wght@300;400;900&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
         :root {
             --gold: #c9a96e;
-            --gold-dim: rgba(201,169,110,0.15);
             --white: #f5f0e8;
-            --white-dim: rgba(245,240,232,0.06);
-            --border: rgba(201,169,110,0.15);
+            --bg: #050405;
         }
 
-        html, body {
-            width: 100%; height: 100%;
-            overflow: hidden;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background: #080608;
-            font-family: 'Cormorant Garamond', serif;
+            background: var(--bg);
             color: var(--white);
-            cursor: default;
+            font-family: 'Cormorant Garamond', serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* ── GRAIN OVERLAY ── */
-        body::before {
-            content: '';
-            position: fixed; inset: 0; z-index: 1000;
-            pointer-events: none;
-            opacity: 0.035;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        /* ── EFECTO CINE: GRANO Y VIÑETA ── */
+        .film-grain {
+            position: fixed; inset: 0; z-index: 10; pointer-events: none;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
         }
 
-        /* ── FONDO NEBULOSA ── */
+        .vignette {
+            position: fixed; inset: 0; z-index: 5; pointer-events: none;
+            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.8) 100%);
+        }
+
+        /* ── NEBULA DINÁMICA ── */
         .nebula {
             position: fixed; inset: 0; z-index: 0;
-            background:
-                radial-gradient(ellipse 60% 50% at 20% 30%, rgba(100,60,20,0.18) 0%, transparent 70%),
-                radial-gradient(ellipse 50% 60% at 80% 70%, rgba(40,20,60,0.2) 0%, transparent 70%),
-                radial-gradient(ellipse 80% 40% at 50% 100%, rgba(201,169,110,0.06) 0%, transparent 60%);
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(201,169,110,0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(0,136,255,0.03) 0%, transparent 50%);
+            filter: blur(60px);
+            animation: nebulaPulse 10s infinite alternate;
         }
 
-        /* ── CANVAS NUBE ── */
-        #canvas {
-            position: fixed; inset: 0; z-index: 1;
+        @keyframes nebulaPulse {
+            from { transform: scale(1); opacity: 0.5; }
+            to { transform: scale(1.2); opacity: 0.8; }
         }
 
-        /* ── HEADER ── */
-        .header {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 10;
-            padding: 32px 40px 0;
-            display: flex; align-items: flex-start; justify-content: space-between;
-            opacity: 0;
-            animation: fadeUp 2s ease 0.5s forwards;
-        }
-
-        .header-brand {
-            font-family: 'Orbitron', monospace;
-            font-size: 0.5rem; font-weight: 300;
-            letter-spacing: 0.35em; text-transform: uppercase;
-            color: rgba(201,169,110,0.5);
-        }
-
-        .header-date {
-            font-style: italic;
-            font-size: 0.85rem; font-weight: 300;
-            color: rgba(245,240,232,0.25);
-            letter-spacing: 0.05em;
-        }
-
-        /* ── TÍTULO CENTRAL ── */
-        .title-block {
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10;
+        /* ── BLOQUE CENTRAL ── */
+        .content-center {
+            position: relative;
+            z-index: 20;
             text-align: center;
-            pointer-events: none;
-            opacity: 0;
-            animation: fadeUp 2.5s ease 0.8s forwards;
-        }
-
-        .title-eyebrow {
-            font-family: 'Orbitron', monospace;
-            font-size: 0.48rem; font-weight: 300;
-            letter-spacing: 0.4em; text-transform: uppercase;
-            color: var(--gold);
-            margin-bottom: 16px;
-            opacity: 0.7;
-        }
-
-        .title-main {
-            font-size: clamp(2.8rem, 6vw, 5rem);
-            font-weight: 300;
-            font-style: italic;
-            line-height: 1.1;
-            color: var(--white);
-            letter-spacing: 0.02em;
-            margin-bottom: 20px;
-        }
-
-        .title-main em {
-            font-style: normal;
-            color: var(--gold);
-        }
-
-        .title-sub {
-            font-size: clamp(0.8rem, 1.5vw, 1rem);
-            font-weight: 300;
-            color: rgba(245,240,232,0.35);
-            letter-spacing: 0.15em;
-            font-style: italic;
-        }
-
-        .title-line {
-            width: 1px; height: 40px;
-            background: linear-gradient(to bottom, transparent, var(--gold), transparent);
-            margin: 20px auto;
-            opacity: 0.4;
-        }
-
-        /* ── FOTO FLOTANTE ── */
-        .photo-item {
-            position: fixed;
-            border-radius: 2px;
-            overflow: hidden;
-            cursor: pointer;
-            z-index: 5;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, opacity 0.4s ease;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,169,110,0.08);
-        }
-
-        .photo-item::after {
-            content: '';
-            position: absolute; inset: 0;
-            background: linear-gradient(135deg, rgba(201,169,110,0.08) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        .photo-item img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            display: block;
-            filter: saturate(0.7) brightness(0.85);
-            transition: filter 0.4s ease;
-        }
-
-        .photo-item:hover {
-            transform: scale(1.18) translateZ(0) !important;
-            box-shadow: 0 12px 48px rgba(0,0,0,0.8), 0 0 0 1px rgba(201,169,110,0.3), 0 0 30px rgba(201,169,110,0.1);
-            z-index: 20 !important;
-        }
-
-        .photo-item:hover img {
-            filter: saturate(1) brightness(1);
-        }
-
-        /* ── LIGHTBOX ── */
-        .lightbox {
-            position: fixed; inset: 0; z-index: 100;
-            background: rgba(8,6,8,0.95);
-            display: none; align-items: center; justify-content: center;
+            max-width: 600px;
             padding: 40px;
-            backdrop-filter: blur(20px);
-        }
-
-        .lightbox.open { display: flex; animation: fadeIn 0.3s ease; }
-
-        .lightbox img {
-            max-width: 90vw; max-height: 85vh;
-            object-fit: contain;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(201,169,110,0.1);
             border-radius: 2px;
-            box-shadow: 0 20px 80px rgba(0,0,0,0.9);
-            filter: saturate(0.85);
         }
 
-        .lightbox-close {
-            position: fixed; top: 24px; right: 32px;
-            font-family: 'Orbitron', monospace;
-            font-size: 0.5rem; letter-spacing: 0.3em;
-            color: rgba(201,169,110,0.5);
-            cursor: pointer; background: none; border: none;
-            text-transform: uppercase;
-            transition: color 0.2s;
-        }
-        .lightbox-close:hover { color: var(--gold); }
-
-        /* ── FOOTER ── */
-        .footer {
-            position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
-            padding: 0 40px 28px;
-            display: flex; align-items: flex-end; justify-content: space-between;
-            opacity: 0;
-            animation: fadeUp 2s ease 1.2s forwards;
+        .title-mini {
+            font-family: 'Orbitron'; font-size: 0.5rem; letter-spacing: 0.5em;
+            color: var(--gold); text-transform: uppercase; margin-bottom: 20px;
         }
 
-        .footer-msg {
-            font-style: italic;
-            font-size: clamp(0.75rem, 1.2vw, 0.9rem);
-            color: rgba(245,240,232,0.2);
-            max-width: 320px;
-            line-height: 1.6;
+        .h-thanks {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-style: italic; font-weight: 300;
+            line-height: 1.1; margin-bottom: 25px;
         }
 
-        .audio-control {
-            display: flex; align-items: center; gap: 10px;
-            cursor: pointer;
-            font-family: 'Orbitron', monospace;
-            font-size: 0.45rem; letter-spacing: 0.25em;
-            color: rgba(201,169,110,0.4);
-            text-transform: uppercase;
-            transition: color 0.2s;
-            background: none; border: none;
-        }
-        .audio-control:hover { color: var(--gold); }
+        .h-thanks em { color: var(--gold); font-style: normal; }
 
-        .audio-dot {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: var(--gold);
-            opacity: 0.4;
-            animation: pulse 2s infinite;
-        }
-        .audio-control.playing .audio-dot { opacity: 1; }
-
-        /* ── VIGNETTE ── */
-        .vignette {
-            position: fixed; inset: 0; z-index: 2;
-            pointer-events: none;
-            background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(8,6,8,0.7) 100%);
+        .line-gold {
+            width: 40px; height: 1px; background: var(--gold);
+            margin: 0 auto 25px; opacity: 0.5;
         }
 
-        /* ── ANIMACIONES ── */
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; } to { opacity: 1; }
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.4; }
-            50% { transform: scale(1.4); opacity: 1; }
+        /* ── FOTOS FLOTANTES (CONSTELLATION) ── */
+        .photo-orbit {
+            position: fixed;
+            z-index: 1;
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            filter: grayscale(0.5) contrast(1.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.05);
+            pointer-events: auto;
         }
 
-        /* ── MOBILE ── */
-        @media (max-width: 600px) {
-            .title-block { display: none; }
-            .header { padding: 20px; }
-            .footer { padding: 0 20px 20px; }
-            .footer-msg { font-size: 0.7rem; max-width: 200px; }
+        .photo-orbit:hover {
+            filter: grayscale(0) contrast(1);
+            transform: scale(1.2) !important;
+            z-index: 30;
+            border-color: var(--gold);
+        }
+
+        .photo-orbit img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ── TIMER DE AUTO-CIERRE ── */
+        .exit-timer {
+            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+            z-index: 20; text-align: center;
+        }
+
+        .timer-bar-container {
+            width: 200px; height: 2px; background: rgba(255,255,255,0.1);
+            margin-top: 10px; border-radius: 2px; overflow: hidden;
+        }
+
+        .timer-bar-fill {
+            width: 100%; height: 100%; background: var(--gold);
+            transform-origin: left;
+            animation: countdown 60s linear forwards;
+        }
+
+        @keyframes countdown {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+
+        .timer-text {
+            font-family: 'Orbitron'; font-size: 0.5rem; letter-spacing: 0.2em;
+            color: rgba(255,255,255,0.3); text-transform: uppercase;
         }
     </style>
 </head>
@@ -261,203 +135,94 @@
 
 <div class="nebula"></div>
 <div class="vignette"></div>
+<div class="film-grain"></div>
 
-<canvas id="canvas"></canvas>
-
-<!-- HEADER -->
-<header class="header">
-    <div class="header-brand">Camilo & Víctor · 2026–2027</div>
-    <div class="header-date">Momentos inolvidables</div>
-</header>
-
-<!-- TÍTULO -->
-<div class="title-block" id="titleBlock">
-    <div class="title-eyebrow">Una historia</div>
-    <h1 class="title-main">Gracias por<br>estar <em>aquí</em></h1>
-    <div class="title-line"></div>
-    <p class="title-sub">Aún quedan muchas fotos por hacer juntos</p>
+<div class="content-center">
+    <div class="title-mini">Sesión Finalizada</div>
+    <h1 class="h-thanks">Gracias por formar parte de nuestra <em>historia</em></h1>
+    <div class="line-gold"></div>
+    <p style="font-style: italic; color: rgba(245,240,232,0.4); font-size: 0.9rem;">
+        Nos vemos muy pronto para celebrar la vida juntos.
+    </p>
 </div>
 
-<!-- FOTOS FLOTANTES -->
-<% 
-const photos = [];
-for(let i = 1; i <= 15; i++) {
-    photos.push(`/images/galeria/img${String(i).padStart(2,'0')}.jpg`);
-}
-%>
+<% for(let i = 1; i <= 12; i++) { %>
+    <div class="photo-orbit" id="p-<%= i %>">
+        <img src="/images/galeria/img<%= String(i).padStart(2,'0') %>.jpg" alt="">
+    </div>
+<% } %>
 
-<% photos.forEach((src, idx) => { %>
-<div class="photo-item" id="photo-<%= idx %>" onclick="openLightbox('<%= src %>')">
-    <img src="<%= src %>" alt="Foto <%= idx + 1 %>" loading="lazy">
-</div>
-<% }); %>
-
-<!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-    <button class="lightbox-close" onclick="closeLightbox()">✕ cerrar</button>
-    <img id="lightbox-img" src="" alt="">
+<div class="exit-timer">
+    <div class="timer-text">Desconectando en <span id="seconds">60</span>s</div>
+    <div class="timer-bar-container">
+        <div class="timer-bar-fill"></div>
+    </div>
 </div>
 
-<!-- FOOTER -->
-<footer class="footer">
-    <p class="footer-msg">Que la música os acompañe mientras recordáis lo que hemos vivido juntos.</p>
-    <button class="audio-control" id="audioBtn" onclick="toggleAudio()">
-        <span class="audio-dot"></span>
-        <span id="audioLabel">Semaphore</span>
-    </button>
-</footer>
-
-<!-- AUDIO -->
-<audio id="audio" loop>
-    <source src="/audio/semaphore.mp3" type="audio/mpeg">
-</audio>
+<audio id="audio-semaphore" src="/audio/semaphore.mp3" loop></audio>
 
 <script>
-// ── FOTOS: POSICIONAMIENTO FLOTANTE ──
-const photos = document.querySelectorAll('.photo-item');
-const totalPhotos = photos.length;
+    const audio = document.getElementById('audio-semaphore');
+    let timeLeft = 60;
 
-// Configuración de cada foto — tamaño y posición inicial
-const photoConfigs = [
-    { w: 160, h: 110, x: 2,  y: 5  },
-    { w: 130, h: 160, x: 14, y: 48 },
-    { w: 150, h: 100, x: 1,  y: 72 },
-    { w: 120, h: 145, x: 24, y: 8  },
-    { w: 175, h: 115, x: 68, y: 2  },
-    { w: 135, h: 180, x: 83, y: 38 },
-    { w: 155, h: 105, x: 76, y: 72 },
-    { w: 130, h: 125, x: 57, y: 74 },
-    { w: 110, h: 145, x: 43, y: 65 },
-    { w: 145, h: 95,  x: 38, y: 2  },
-    { w: 120, h: 155, x: 52, y: 15 },
-    { w: 140, h: 105, x: 8,  y: 28 },
-    { w: 125, h: 160, x: 86, y: 5  },
-    { w: 155, h: 115, x: 18, y: 78 },
-    { w: 110, h: 135, x: 63, y: 48 },
-];
-
-// Animación flotante — cada foto tiene su propio ciclo
-const floatData = photoConfigs.map((cfg, i) => ({
-    ...cfg,
-    speedX: (Math.random() - 0.5) * 0.008,
-    speedY: (Math.random() - 0.5) * 0.006,
-    offsetX: Math.random() * Math.PI * 2,
-    offsetY: Math.random() * Math.PI * 2,
-    amplitude: 8 + Math.random() * 12,
-}));
-
-let time = 0;
-
-function animatePhotos() {
-    time += 0.008;
-    floatData.forEach((data, i) => {
-        const el = photos[i];
-        if (!el) return;
-        const px = data.x + Math.sin(time + data.offsetX) * (data.amplitude / window.innerWidth * 100);
-        const py = data.y + Math.cos(time + data.offsetY) * (data.amplitude / window.innerHeight * 100);
-        el.style.left = `${px}%`;
-        el.style.top  = `${py}%`;
-        el.style.width  = `${data.w}px`;
-        el.style.height = `${data.h}px`;
-    });
-    requestAnimationFrame(animatePhotos);
-}
-
-// Init fotos
-floatData.forEach((data, i) => {
-    const el = photos[i];
-    if (!el) return;
-    el.style.left   = `${data.x}%`;
-    el.style.top    = `${data.y}%`;
-    el.style.width  = `${data.w}px`;
-    el.style.height = `${data.h}px`;
-    el.style.opacity = '0';
-    el.style.transition = `opacity 1s ease ${0.3 + i * 0.12}s, transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease`;
-    setTimeout(() => { el.style.opacity = '1'; }, 100);
-});
-
-animatePhotos();
-
-// ── TÍTULO — desaparece al hacer scroll o touch ──
-let titleVisible = true;
-const titleBlock = document.getElementById('titleBlock');
-
-function hideTitle() {
-    if (titleVisible) {
-        titleVisible = false;
-        titleBlock.style.transition = 'opacity 1.5s ease';
-        titleBlock.style.opacity = '0';
-        setTimeout(() => { titleBlock.style.display = 'none'; }, 1500);
-    }
-}
-
-setTimeout(hideTitle, 5000); // desaparece solo a los 5s
-document.addEventListener('mousemove', hideTitle, { once: true });
-document.addEventListener('touchstart', hideTitle, { once: true });
-
-// ── LIGHTBOX ──
-function openLightbox(src) {
-    document.getElementById('lightbox-img').src = src;
-    document.getElementById('lightbox').classList.add('open');
-}
-function closeLightbox() {
-    document.getElementById('lightbox').classList.remove('open');
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
-
-// ── AUDIO ──
-const audio = document.getElementById('audio');
-const audioBtn = document.getElementById('audioBtn');
-let audioStarted = false;
-
-audio.volume = 0;
-
-function fadeInAudio() {
-    audio.play().then(() => {
-        let vol = 0;
-        const fade = setInterval(() => {
-            vol = Math.min(vol + 0.02, 0.55);
-            audio.volume = vol;
-            if (vol >= 0.55) clearInterval(fade);
-        }, 100);
-        audioBtn.classList.add('playing');
-        document.getElementById('audioLabel').textContent = 'Sonando';
-        audioStarted = true;
-    }).catch(() => {});
-}
-
-function toggleAudio() {
-    if (!audioStarted) {
-        fadeInAudio();
-    } else if (audio.paused) {
-        audio.play();
-        audioBtn.classList.add('playing');
-        document.getElementById('audioLabel').textContent = 'Sonando';
-    } else {
-        audio.pause();
-        audioBtn.classList.remove('playing');
-        document.getElementById('audioLabel').textContent = 'Semaphore';
-    }
-}
-
-// Autoplay al primer toque/click
-document.addEventListener('click', () => {
-    if (!audioStarted) fadeInAudio();
-}, { once: true });
-document.addEventListener('touchstart', () => {
-    if (!audioStarted) fadeInAudio();
-}, { once: true });
-
-// ── MOBILE: reorganizar fotos para pantallas pequeñas ──
-function adjustForMobile() {
-    if (window.innerWidth < 600) {
-        floatData.forEach((data, i) => {
-            data.w = Math.round(data.w * 0.65);
-            data.h = Math.round(data.h * 0.65);
+    // 1. Lógica de Audio (Intento de autoplay)
+    function playSemaphore() {
+        audio.volume = 0;
+        audio.play().then(() => {
+            // Fade in suave
+            let vol = 0;
+            const fadeIn = setInterval(() => {
+                vol += 0.02;
+                audio.volume = Math.min(vol, 0.4);
+                if (vol >= 0.4) clearInterval(fadeIn);
+            }, 150);
+        }).catch(() => {
+            console.log("Autoplay bloqueado. Esperando interacción...");
         });
     }
-}
-adjustForMobile();
+
+    // Al venir del dashboard (clic), el navegador suele permitir el audio
+    window.addEventListener('load', playSemaphore);
+    document.addEventListener('click', () => { if(audio.paused) playSemaphore(); }, {once: true});
+
+    // 2. Temporizador de 60 segundos
+    const countdown = setInterval(() => {
+        timeLeft--;
+        document.getElementById('seconds').innerText = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(countdown);
+            window.location.href = "/"; // Redirigir a la landing al acabar
+        }
+    }, 1000);
+
+    // 3. Posicionamiento de "Constelación" de fotos
+    const photos = document.querySelectorAll('.photo-orbit');
+    const positions = [
+        { w: 140, h: 100, x: 10, y: 15 }, { w: 100, h: 140, x: 80, y: 10 },
+        { w: 120, h: 120, x: 15, y: 70 }, { w: 150, h: 100, x: 75, y: 75 },
+        { w: 90, h: 130, x: 5, y: 45 },  { w: 110, h: 110, x: 85, y: 40 },
+        { w: 130, h: 90, x: 45, y: 5 },  { w: 100, h: 100, x: 45, y: 85 },
+        { w: 120, h: 160, x: 25, y: 10 }, { w: 140, h: 100, x: 65, y: 15 },
+        { w: 80, h: 120, x: 20, y: 85 }, { w: 100, h: 140, x: 70, y: 85 }
+    ];
+
+    photos.forEach((photo, i) => {
+        const pos = positions[i];
+        photo.style.width = pos.w + 'px';
+        photo.style.height = pos.h + 'px';
+        photo.style.left = pos.x + '%';
+        photo.style.top = pos.y + '%';
+        
+        // Movimiento flotante individual
+        let angle = Math.random() * Math.PI * 2;
+        setInterval(() => {
+            angle += 0.01;
+            const ox = Math.cos(angle) * 15;
+            const oy = Math.sin(angle) * 15;
+            photo.style.transform = `translate(${ox}px, ${oy}px)`;
+        }, 30);
+    });
 </script>
+
 </body>
 </html>
