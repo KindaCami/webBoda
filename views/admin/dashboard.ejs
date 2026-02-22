@@ -1,0 +1,562 @@
+"/home/claude/admin-dashboard.ejs"
+    },
+    "message": "Panel de admin completo con estad\u00edsticas, gr\u00e1ficas, tabla de invitados, alergias y lista de espera",
+    "integration_name": null,
+    "integration_icon_url": null,
+    "icon_name": "file",
+    "context": null,
+    "display_content": {
+      "type": "json_block",
+      "json_block": "{\"language\": \"plaintext\", \"code\": \"<!DOCTYPE html>
+<html lang=\"es\">
+<head>
+    <meta charset=\"UTF-8\">
+    <title>Admin · Panel de Control · Nuestra Boda</title>
+    <link href=\"https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap\" rel=\"stylesheet\">
+    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js\"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --green: #00ff88; --blue: #0088ff; --pink: #ff00cc; --gold: #ffd700;
+            --orange: #ffa500; --red: #ff4444;
+            --surface: rgba(8,8,20,0.9); --border: rgba(255,255,255,0.07);
+        }
+        body { min-height: 100vh; background: #000; color: #fff; font-family: 'Inter', sans-serif;
+            background-image: radial-gradient(ellipse at 10% 20%, rgba(255,0,204,0.03) 0%, transparent 50%),
+                              radial-gradient(ellipse at 90% 80%, rgba(0,136,255,0.03) 0%, transparent 50%);
+        }
+
+        /* ── NAV ── */
+        .admin-nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 56px;
+        }
+        .nav-brand { font-family: 'Orbitron', monospace; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.25em; color: var(--pink); }
+        .nav-links { display: flex; gap: 4px; }
+        .nav-link { font-family: 'Orbitron', monospace; font-size: 0.55rem; letter-spacing: 0.15em; color: rgba(255,255,255,0.4); text-decoration: none; padding: 6px 12px; border-radius: 3px; transition: color 0.2s, background 0.2s; }
+        .nav-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .nav-link.active { color: var(--green); background: rgba(0,255,136,0.08); }
+        .nav-right { display: flex; align-items: center; gap: 16px; }
+        .nav-user { font-family: 'Orbitron', monospace; font-size: 0.55rem; color: rgba(255,255,255,0.3); }
+        .btn-logout-nav { font-family: 'Orbitron', monospace; font-size: 0.55rem; letter-spacing: 0.15em; color: rgba(255,60,60,0.6); text-decoration: none; padding: 6px 10px; border: 1px solid rgba(255,60,60,0.2); border-radius: 3px; transition: color 0.2s, border-color 0.2s; }
+        .btn-logout-nav:hover { color: var(--red); border-color: rgba(255,60,60,0.5); }
+
+        /* ── LAYOUT ── */
+        .page { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+
+        .flash { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 3px; margin-bottom: 24px; font-size: 0.85rem; }
+        .flash-success { background: rgba(0,255,136,0.07); border: 1px solid rgba(0,255,136,0.2); border-left: 3px solid var(--green); color: var(--green); }
+        .flash-error   { background: rgba(255,60,60,0.07); border: 1px solid rgba(255,60,60,0.2); border-left: 3px solid var(--red); color: #ff7070; }
+
+        /* ── SECTION HEADER ── */
+        .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .section-title { font-family: 'Orbitron', monospace; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
+        .section-divider { height: 1px; background: var(--border); margin: 36px 0; }
+
+        /* ── STAT CARDS ── */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 32px; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 20px; position: relative; overflow: hidden; }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+        .stat-green::before { background: var(--green); }
+        .stat-blue::before  { background: var(--blue); }
+        .stat-pink::before  { background: var(--pink); }
+        .stat-gold::before  { background: var(--gold); }
+        .stat-orange::before { background: var(--orange); }
+        .stat-red::before   { background: var(--red); }
+        .stat-label { font-family: 'Orbitron', monospace; font-size: 0.52rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 10px; }
+        .stat-value { font-family: 'Orbitron', monospace; font-size: 2rem; font-weight: 900; color: #fff; line-height: 1; }
+        .stat-sub { font-size: 0.75rem; color: rgba(255,255,255,0.3); margin-top: 6px; }
+
+        /* Camas progress */
+        .beds-bar { margin-top: 8px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+        .beds-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+
+        /* ── GRÁFICAS ── */
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+        .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; }
+        .chart-title { font-family: 'Orbitron', monospace; font-size: 0.58rem; letter-spacing: 0.2em; color: rgba(255,255,255,0.35); text-transform: uppercase; margin-bottom: 16px; }
+        .chart-wrap { position: relative; height: 160px; }
+
+        /* ── TABLA INVITADOS ── */
+        .table-controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .search-input { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 3px; padding: 8px 14px; color: #fff; font-family: 'Inter', sans-serif; font-size: 0.85rem; outline: none; width: 240px; transition: border-color 0.2s; }
+        .search-input:focus { border-color: rgba(0,255,136,0.4); }
+        .search-input::placeholder { color: rgba(255,255,255,0.2); }
+        .btn { font-family: 'Orbitron', monospace; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; padding: 8px 16px; border-radius: 3px; cursor: pointer; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s, box-shadow 0.2s; }
+        .btn-green  { background: var(--green); color: #000; box-shadow: 0 0 16px rgba(0,255,136,0.2); }
+        .btn-green:hover { background: #33ffaa; }
+        .btn-pink   { background: rgba(255,0,204,0.15); color: var(--pink); border: 1px solid rgba(255,0,204,0.3); }
+        .btn-pink:hover { background: rgba(255,0,204,0.25); }
+        .btn-red    { background: rgba(255,60,60,0.12); color: var(--red); border: 1px solid rgba(255,60,60,0.25); font-size: 0.5rem; padding: 5px 10px; }
+        .btn-red:hover { background: rgba(255,60,60,0.22); }
+        .btn-edit   { background: rgba(0,136,255,0.12); color: var(--blue); border: 1px solid rgba(0,136,255,0.25); font-size: 0.5rem; padding: 5px 10px; }
+        .btn-edit:hover { background: rgba(0,136,255,0.22); }
+
+        .table-wrap { overflow-x: auto; margin-top: 16px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        thead th { font-family: 'Orbitron', monospace; font-size: 0.52rem; letter-spacing: 0.15em; color: rgba(255,255,255,0.3); text-transform: uppercase; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        tbody tr { border-bottom: 1px solid rgba(255,255,255,0.03); transition: background 0.15s; }
+        tbody tr:hover { background: rgba(255,255,255,0.02); }
+        tbody td { padding: 10px 12px; color: rgba(255,255,255,0.75); vertical-align: middle; }
+        .td-name { font-weight: 600; color: #fff; }
+        .td-group { font-size: 0.75rem; color: rgba(255,255,255,0.35); }
+
+        /* Badges */
+        .badge { display: inline-block; font-family: 'Orbitron', monospace; font-size: 0.48rem; letter-spacing: 0.1em; padding: 2px 7px; border-radius: 2px; font-weight: 700; }
+        .badge-si      { background: rgba(0,255,136,0.12); color: var(--green); }
+        .badge-no      { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.2); }
+        .badge-vip     { background: rgba(255,215,0,0.12); color: var(--gold); border: 1px solid rgba(255,215,0,0.2); }
+        .badge-conf    { background: rgba(0,255,136,0.1); color: var(--green); border: 1px solid rgba(0,255,136,0.2); }
+        .badge-wait    { background: rgba(255,165,0,0.1); color: var(--orange); border: 1px solid rgba(255,165,0,0.2); }
+        .badge-none    { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.07); }
+        .badge-menu    { background: rgba(0,136,255,0.1); color: var(--blue); }
+
+        /* ── ALERGIAS ── */
+        .allergy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+        .allergy-card { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--orange); border-radius: 4px; padding: 16px; }
+        .allergy-name { font-weight: 600; color: #fff; margin-bottom: 4px; }
+        .allergy-group { font-size: 0.75rem; color: rgba(255,255,255,0.3); margin-bottom: 10px; }
+        .allergy-detail { font-size: 0.8rem; color: rgba(255,255,255,0.6); line-height: 1.5; }
+        .allergy-tag { display: inline-block; font-size: 0.7rem; padding: 2px 8px; border-radius: 2px; margin-bottom: 4px; }
+
+        /* ── LISTA ESPERA ── */
+        .waiting-table td, .waiting-table th { padding: 8px 12px; }
+
+        /* ── SETTINGS ── */
+        .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; max-width: 400px; }
+        .settings-row { display: flex; gap: 10px; align-items: flex-end; margin-top: 12px; }
+        .settings-row input { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 3px; padding: 10px 14px; color: #fff; font-family: 'Orbitron', monospace; font-size: 1rem; font-weight: 700; width: 100px; outline: none; text-align: center; }
+
+        /* ── MODAL EDICIÓN ── */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; display: none; align-items: center; justify-content: center; padding: 24px; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: #0d0d1a; border: 1px solid var(--border); border-radius: 4px; width: 100%; max-width: 480px; overflow: hidden; }
+        .modal-accent { height: 3px; background: linear-gradient(90deg, var(--blue), var(--green)); }
+        .modal-body { padding: 28px; }
+        .modal-title { font-family: 'Orbitron', monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.2em; color: var(--blue); margin-bottom: 20px; }
+        .modal-field { margin-bottom: 14px; }
+        .modal-field label { display: block; font-family: 'Orbitron', monospace; font-size: 0.52rem; letter-spacing: 0.18em; color: rgba(255,255,255,0.3); text-transform: uppercase; margin-bottom: 6px; }
+        .modal-field input, .modal-field select, .modal-field textarea { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 3px; padding: 10px 12px; color: #fff; font-family: 'Inter', sans-serif; font-size: 0.85rem; outline: none; }
+        .modal-field select option { background: #0d0d1a; }
+        .modal-field textarea { resize: vertical; min-height: 64px; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        .btn-cancel { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px solid var(--border); }
+
+        @media (max-width: 900px) {
+            .charts-grid { grid-template-columns: 1fr 1fr; }
+            .stats-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .charts-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .admin-nav { padding: 0 16px; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class=\"admin-nav\">
+    <span class=\"nav-brand\">✦ ADMIN · BODA</span>
+    <div class=\"nav-links\">
+        <a href=\"#stats\"   class=\"nav-link active\">Stats</a>
+        <a href=\"#guests\"  class=\"nav-link\">Invitados</a>
+        <a href=\"#allergy\" class=\"nav-link\">Alergias</a>
+        <a href=\"#waiting\" class=\"nav-link\">Espera</a>
+        <a href=\"#settings\" class=\"nav-link\">Config</a>
+    </div>
+    <div class=\"nav-right\">
+        <span class=\"nav-user\">👤 <%= typeof adminUser !== 'undefined' ? adminUser : 'admin' %></span>
+        <a href=\"/admin/logout\" class=\"btn-logout-nav\">⏻ Salir</a>
+    </div>
+</nav>
+
+<div class=\"page\">
+
+    <% if (success) { %>
+    <div class=\"flash flash-success\">✓ <%= success %></div>
+    <% } %>
+    <% if (error) { %>
+    <div class=\"flash flash-error\">⚠ <%= error %></div>
+    <% } %>
+
+    <!-- ══ STATS ══ -->
+    <div id=\"stats\">
+        <div class=\"section-head\">
+            <span class=\"section-title\">✦ Estadísticas generales</span>
+        </div>
+
+        <div class=\"stats-grid\">
+            <div class=\"stat-card stat-green\">
+                <div class=\"stat-label\">Total invitados</div>
+                <div class=\"stat-value\"><%= stats.total_guests || 0 %></div>
+                <div class=\"stat-sub\"><%= stats.confirmed_guests || 0 %> han confirmado</div>
+            </div>
+            <div class=\"stat-card stat-gold\">
+                <div class=\"stat-label\">Ceremonia 2026</div>
+                <div class=\"stat-value\"><%= stats.ceremony_2026 || 0 %></div>
+                <div class=\"stat-sub\">Plaza Mayor, Madrid</div>
+            </div>
+            <div class=\"stat-card stat-blue\">
+                <div class=\"stat-label\">Viernes 2027</div>
+                <div class=\"stat-value\"><%= stats.friday_2027 || 0 %></div>
+                <div class=\"stat-sub\">Cena de bienvenida</div>
+            </div>
+            <div class=\"stat-card stat-pink\">
+                <div class=\"stat-label\">Sábado 2027</div>
+                <div class=\"stat-value\"><%= stats.saturday_2027 || 0 %></div>
+                <div class=\"stat-sub\">Gran fiesta</div>
+            </div>
+            <div class=\"stat-card stat-green\">
+                <div class=\"stat-label\">Domingo 2027</div>
+                <div class=\"stat-value\"><%= stats.sunday_2027 || 0 %></div>
+                <div class=\"stat-sub\">Brunch despedida</div>
+            </div>
+            <div class=\"stat-card stat-blue\">
+                <div class=\"stat-label\">Camas libres</div>
+                <div class=\"stat-value\" style=\"color: <%= stats.free_spots > 10 ? '#00ff88' : stats.free_spots > 0 ? '#ffa500' : '#ff4444' %>\">
+                    <%= stats.free_spots || 0 %>
+                </div>
+                <div class=\"stat-sub\">de <%= stats.max_spots %> disponibles</div>
+                <div class=\"beds-bar\">
+                    <div class=\"beds-fill\" style=\"width: <%= Math.min(100, ((stats.confirmed_acc || 0) / stats.max_spots) * 100) %>%; background: <%= stats.free_spots > 10 ? '#00ff88' : stats.free_spots > 0 ? '#ffa500' : '#ff4444' %>\"></div>
+                </div>
+            </div>
+            <div class=\"stat-card stat-orange\">
+                <div class=\"stat-label\">Lista espera</div>
+                <div class=\"stat-value\" style=\"color: var(--orange)\"><%= stats.waiting_acc || 0 %></div>
+                <div class=\"stat-sub\">personas esperando</div>
+            </div>
+            <div class=\"stat-card stat-green\">
+                <div class=\"stat-label\">Noches Viernes</div>
+                <div class=\"stat-value\"><%= stats.acc_friday || 0 %></div>
+                <div class=\"stat-sub\">21 → 22 Mayo</div>
+            </div>
+            <div class=\"stat-card stat-blue\">
+                <div class=\"stat-label\">Noches Sábado</div>
+                <div class=\"stat-value\"><%= stats.acc_saturday || 0 %></div>
+                <div class=\"stat-sub\">22 → 23 Mayo</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ GRÁFICAS ══ -->
+    <div class=\"charts-grid\">
+        <div class=\"chart-card\">
+            <div class=\"chart-title\">Asistencia por evento</div>
+            <div class=\"chart-wrap\"><canvas id=\"chartEventos\"></canvas></div>
+        </div>
+        <div class=\"chart-card\">
+            <div class=\"chart-title\">Tipo de menú</div>
+            <div class=\"chart-wrap\"><canvas id=\"chartMenus\"></canvas></div>
+        </div>
+        <div class=\"chart-card\">
+            <div class=\"chart-title\">Noches de alojamiento</div>
+            <div class=\"chart-wrap\"><canvas id=\"chartNoches\"></canvas></div>
+        </div>
+    </div>
+
+    <div class=\"section-divider\"></div>
+
+    <!-- ══ INVITADOS ══ -->
+    <div id=\"guests\">
+        <div class=\"section-head\">
+            <span class=\"section-title\">✦ Todos los invitados</span>
+            <div class=\"table-controls\">
+                <input type=\"text\" class=\"search-input\" id=\"searchInput\" placeholder=\"🔍 Buscar invitado o grupo...\">
+                <a href=\"/admin/export/csv\" class=\"btn btn-green\">⬇ Exportar CSV</a>
+            </div>
+        </div>
+
+        <div class=\"table-wrap\">
+            <table id=\"guestTable\">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Grupo</th>
+                        <th>Email</th>
+                        <th>Cer'26</th>
+                        <th>Vie'27</th>
+                        <th>Sáb'27</th>
+                        <th>Dom'27</th>
+                        <th>Aloj.</th>
+                        <th>Menú</th>
+                        <th>Confirmado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% groups.forEach(group => { %>
+                        <% group.members.forEach(guest => { %>
+                        <tr data-search=\"<%= (guest.fullname + ' ' + group.group_name).toLowerCase() %>\">
+                            <td>
+                                <div class=\"td-name\"><%= guest.fullname %></div>
+                                <% if (group.is_vip) { %><span class=\"badge badge-vip\">VIP</span><% } %>
+                            </td>
+                            <td class=\"td-group\"><%= group.group_name %></td>
+                            <td style=\"font-size:0.75rem; color:rgba(255,255,255,0.4)\"><%= guest.email || '—' %></td>
+                            <td><span class=\"badge <%= guest.attending_ceremony_2026 ? 'badge-si' : 'badge-no' %>\"><%= guest.attending_ceremony_2026 ? 'Sí' : 'No' %></span></td>
+                            <td><span class=\"badge <%= guest.attending_friday_2027 ? 'badge-si' : 'badge-no' %>\"><%= guest.attending_friday_2027 ? 'Sí' : 'No' %></span></td>
+                            <td><span class=\"badge <%= guest.attending_saturday_2027 ? 'badge-si' : 'badge-no' %>\"><%= guest.attending_saturday_2027 ? 'Sí' : 'No' %></span></td>
+                            <td><span class=\"badge <%= guest.attending_sunday_2027 ? 'badge-si' : 'badge-no' %>\"><%= guest.attending_sunday_2027 ? 'Sí' : 'No' %></span></td>
+                            <td>
+                                <% if (guest.accommodation_status === 'confirmed_free') { %>
+                                    <span class=\"badge badge-conf\">✓ Conf.</span>
+                                <% } else if (guest.accommodation_status === 'waiting_list') { %>
+                                    <span class=\"badge badge-wait\">⏳ Espera</span>
+                                <% } else { %>
+                                    <span class=\"badge badge-none\">—</span>
+                                <% } %>
+                            </td>
+                            <td><span class=\"badge badge-menu\"><%= guest.menu_type || 'estándar' %></span></td>
+                            <td style=\"font-size:0.72rem; color:rgba(255,255,255,0.35)\">
+                                <%= guest.confirmed_at ? new Date(guest.confirmed_at).toLocaleDateString('es-ES') : '—' %>
+                            </td>
+                            <td>
+                                <div style=\"display:flex; gap:6px\">
+                                    <button class=\"btn btn-edit\"
+                                        onclick=\"openEdit(<%= JSON.stringify({
+                                            id: guest.id,
+                                            fullname: guest.fullname,
+                                            email: guest.email || '',
+                                            menu_type: guest.menu_type || 'estandar',
+                                            allergies: guest.allergies_specifications || '',
+                                            observations: guest.observations || ''
+                                        }) %>)\">✏ Editar</button>
+                                    <form action=\"/admin/guest/delete/<%= guest.id %>\" method=\"POST\" onsubmit=\"return confirm('¿Eliminar a <%= guest.fullname %>?')\">
+                                        <button type=\"submit\" class=\"btn btn-red\">✕</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class=\"section-divider\"></div>
+
+    <!-- ══ ALERGIAS ══ -->
+    <div id=\"allergy\">
+        <div class=\"section-head\">
+            <span class=\"section-title\">✦ Alergias, menús especiales y observaciones</span>
+        </div>
+        <% if (allergies.length === 0) { %>
+            <p style=\"color:rgba(255,255,255,0.3); font-size:0.85rem\">No hay alergias ni menús especiales registrados.</p>
+        <% } else { %>
+        <div class=\"allergy-grid\">
+            <% allergies.forEach(a => { %>
+            <div class=\"allergy-card\">
+                <div class=\"allergy-name\"><%= a.fullname %></div>
+                <div class=\"allergy-group\"><%= a.group_name %></div>
+                <div class=\"allergy-detail\">
+                    <% if (a.menu_type && a.menu_type !== 'estandar') { %>
+                        <span class=\"allergy-tag badge badge-menu\">🍽 <%= a.menu_type %></span><br>
+                    <% } %>
+                    <% if (a.allergies_specifications) { %>
+                        <span style=\"color: var(--orange)\">⚠ Alergias:</span> <%= a.allergies_specifications %><br>
+                    <% } %>
+                    <% if (a.observations) { %>
+                        <span style=\"color: rgba(255,255,255,0.4)\">\\ud83d\\udcdd</span> <%= a.observations %>
+                    <% } %>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+        <% } %>
+    </div>
+
+    <div class=\"section-divider\"></div>
+
+    <!-- ══ LISTA DE ESPERA ══ -->
+    <div id=\"waiting\">
+        <div class=\"section-head\">
+            <span class=\"section-title\">✦ Lista de espera · Alojamiento</span>
+            <span style=\"font-family:'Orbitron',monospace; font-size:0.6rem; color:var(--orange)\">
+                <%= waitingList.length %> persona<%= waitingList.length !== 1 ? 's' : '' %> esperando
+            </span>
+        </div>
+        <% if (waitingList.length === 0) { %>
+            <p style=\"color:rgba(255,255,255,0.3); font-size:0.85rem\">✓ Nadie en lista de espera.</p>
+        <% } else { %>
+        <div class=\"table-wrap\">
+            <table class=\"waiting-table\">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Grupo</th>
+                        <th>Email</th>
+                        <th>N. Viernes</th>
+                        <th>N. Sábado</th>
+                        <th>N. Domingo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% waitingList.forEach(w => { %>
+                    <tr>
+                        <td class=\"td-name\"><%= w.fullname %></td>
+                        <td class=\"td-group\"><%= w.group_name %></td>
+                        <td style=\"font-size:0.75rem; color:rgba(255,255,255,0.4)\"><%= w.email || '—' %></td>
+                        <td><span class=\"badge <%= w.accommodation_friday ? 'badge-wait' : 'badge-no' %>\"><%= w.accommodation_friday ? '⏳' : '—' %></span></td>
+                        <td><span class=\"badge <%= w.accommodation_saturday ? 'badge-wait' : 'badge-no' %>\"><%= w.accommodation_saturday ? '⏳' : '—' %></span></td>
+                        <td><span class=\"badge <%= w.accommodation_sunday ? 'badge-wait' : 'badge-no' %>\"><%= w.accommodation_sunday ? '⏳' : '—' %></span></td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+        <% } %>
+    </div>
+
+    <div class=\"section-divider\"></div>
+
+    <!-- ══ CONFIGURACIÓN ══ -->
+    <div id=\"settings\">
+        <div class=\"section-head\">
+            <span class=\"section-title\">✦ Configuración</span>
+        </div>
+        <div class=\"settings-card\">
+            <div style=\"font-family:'Orbitron',monospace; font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:8px\">Camas disponibles totales</div>
+            <div style=\"font-size:0.85rem; color:rgba(255,255,255,0.4); margin-bottom:12px\">Actualmente: <strong style=\"color:#fff\"><%= stats.max_spots %></strong> · Ocupadas: <strong style=\"color:var(--green)\"><%= stats.confirmed_acc || 0 %></strong> · Libres: <strong style=\"color:<%= stats.free_spots > 0 ? 'var(--green)' : 'var(--red)' %>\"><%= stats.free_spots %></strong></div>
+            <form action=\"/admin/settings/spots\" method=\"POST\">
+                <div class=\"settings-row\">
+                    <input type=\"number\" name=\"max_spots\" value=\"<%= stats.max_spots %>\" min=\"0\" max=\"999\">
+                    <button type=\"submit\" class=\"btn btn-green\">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── MODAL EDICIÓN ── -->
+<div class=\"modal-overlay\" id=\"editModal\">
+    <div class=\"modal\">
+        <div class=\"modal-accent\"></div>
+        <div class=\"modal-body\">
+            <div class=\"modal-title\">✏ Editar invitado</div>
+            <form id=\"editForm\" method=\"POST\">
+                <input type=\"hidden\" name=\"id\" id=\"edit-id\">
+                <div class=\"modal-field\">
+                    <label>Nombre completo</label>
+                    <input type=\"text\" name=\"fullname\" id=\"edit-fullname\" required>
+                </div>
+                <div class=\"modal-field\">
+                    <label>Email</label>
+                    <input type=\"email\" name=\"email\" id=\"edit-email\">
+                </div>
+                <div class=\"modal-field\">
+                    <label>Tipo de menú</label>
+                    <select name=\"menu_type\" id=\"edit-menu\">
+                        <option value=\"estandar\">Estándar</option>
+                        <option value=\"vegetariano\">Vegetariano</option>
+                        <option value=\"vegano\">Vegano</option>
+                        <option value=\"infantil\">Infantil</option>
+                    </select>
+                </div>
+                <div class=\"modal-field\">
+                    <label>Alergias / Intolerancias</label>
+                    <input type=\"text\" name=\"allergies\" id=\"edit-allergies\">
+                </div>
+                <div class=\"modal-field\">
+                    <label>Observaciones</label>
+                    <textarea name=\"observations\" id=\"edit-observations\"></textarea>
+                </div>
+                <div class=\"modal-actions\">
+                    <button type=\"button\" class=\"btn btn-cancel\" onclick=\"closeEdit()\">Cancelar</button>
+                    <button type=\"submit\" class=\"btn btn-green\">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── B\\u00daSQUEDA ──
+document.getElementById('searchInput').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#guestTable tbody tr').forEach(row => {
+        row.style.display = row.dataset.search.includes(q) ? '' : 'none';
+    });
+});
+
+// ── MODAL ──
+function openEdit(guest) {
+    document.getElementById('edit-id').value = guest.id;
+    document.getElementById('edit-fullname').value = guest.fullname;
+    document.getElementById('edit-email').value = guest.email;
+    document.getElementById('edit-menu').value = guest.menu_type;
+    document.getElementById('edit-allergies').value = guest.allergies;
+    document.getElementById('edit-observations').value = guest.observations;
+    document.getElementById('editForm').action = '/admin/guest/edit/' + guest.id;
+    document.getElementById('editModal').classList.add('open');
+}
+function closeEdit() { document.getElementById('editModal').classList.remove('open'); }
+document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEdit();
+});
+
+// ── GRÁFICAS ──
+const chartDefaults = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: 'rgba(255,255,255,0.5)', font: { size: 11 }, boxWidth: 12 } } }
+};
+
+// Eventos
+new Chart(document.getElementById('chartEventos'), {
+    type: 'bar',
+    data: {
+        labels: ['Cer. 2026', 'Vie. 2027', 'Sáb. 2027', 'Dom. 2027'],
+        datasets: [{
+            data: [<%= stats.ceremony_2026||0 %>, <%= stats.friday_2027||0 %>, <%= stats.saturday_2027||0 %>, <%= stats.sunday_2027||0 %>],
+            backgroundColor: ['rgba(255,215,0,0.7)', 'rgba(0,136,255,0.7)', 'rgba(255,0,204,0.7)', 'rgba(0,255,136,0.7)'],
+            borderRadius: 3, borderWidth: 0
+        }]
+    },
+    options: { ...chartDefaults, plugins: { legend: { display: false } }, scales: {
+        x: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        y: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' }, beginAtZero: true }
+    }}
+});
+
+// Menús
+const menuData = <%- JSON.stringify(menuStats) %>;
+const menuLabels = menuData.map(m => m.menu_type || 'estándar');
+const menuValues = menuData.map(m => m.total);
+new Chart(document.getElementById('chartMenus'), {
+    type: 'doughnut',
+    data: {
+        labels: menuLabels,
+        datasets: [{ data: menuValues, backgroundColor: ['rgba(0,136,255,0.8)', 'rgba(0,255,136,0.8)', 'rgba(255,215,0,0.8)', 'rgba(255,0,204,0.8)'], borderWidth: 0 }]
+    },
+    options: { ...chartDefaults, cutout: '65%' }
+});
+
+// Noches
+new Chart(document.getElementById('chartNoches'), {
+    type: 'bar',
+    data: {
+        labels: ['Noche Viernes', 'Noche Sábado', 'Noche Domingo'],
+        datasets: [{
+            label: 'Personas',
+            data: [<%= stats.acc_friday||0 %>, <%= stats.acc_saturday||0 %>, <%= stats.accommodation_sunday||0 %>],
+            backgroundColor: ['rgba(0,255,136,0.7)', 'rgba(0,136,255,0.7)', 'rgba(255,0,204,0.7)'],
+            borderRadius: 3, borderWidth: 0
+        }]
+    },
+    options: { ...chartDefaults, plugins: { legend: { display: false } }, scales: {
+        x: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        y: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' }, beginAtZero: true }
+    }}
+});
+</script>
+</body>
+</html>
+\
