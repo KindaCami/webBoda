@@ -25,7 +25,6 @@
             justify-content: center;
         }
 
-        /* ── EFECTO CINE: GRANO Y VIÑETA ── */
         .film-grain {
             position: fixed; inset: 0; z-index: 10; pointer-events: none;
             opacity: 0.04;
@@ -37,7 +36,6 @@
             background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.8) 100%);
         }
 
-        /* ── NEBULA DINÁMICA ── */
         .nebula {
             position: fixed; inset: 0; z-index: 0;
             background: 
@@ -52,7 +50,6 @@
             to { transform: scale(1.2); opacity: 0.8; }
         }
 
-        /* ── BLOQUE CENTRAL ── */
         .content-center {
             position: relative;
             z-index: 20;
@@ -83,7 +80,6 @@
             margin: 0 auto 25px; opacity: 0.5;
         }
 
-        /* ── FOTOS FLOTANTES (CONSTELLATION) ── */
         .photo-orbit {
             position: fixed;
             z-index: 1;
@@ -103,7 +99,6 @@
 
         .photo-orbit img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* ── TIMER DE AUTO-CIERRE ── */
         .exit-timer {
             position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
             z-index: 20; text-align: center;
@@ -146,9 +141,9 @@
     </p>
 </div>
 
-<% for(let i = 1; i <= 12; i++) { %>
+<% for(let i = 1; i <= 15; i++) { %>
     <div class="photo-orbit" id="p-<%= i %>">
-        <img src="/images/galeria/img<%= String(i).padStart(2,'0') %>.jpg" alt="">
+        <img src="/images/galeria/img<%= String(i).padStart(2,'0') %>.jpg" alt="Recuerdo <%= i %>">
     </div>
 <% } %>
 
@@ -165,60 +160,58 @@
     const audio = document.getElementById('audio-semaphore');
     let timeLeft = 60;
 
-    // 1. Lógica de Audio (Intento de autoplay)
     function playSemaphore() {
         audio.volume = 0;
         audio.play().then(() => {
-            // Fade in suave
             let vol = 0;
             const fadeIn = setInterval(() => {
                 vol += 0.02;
                 audio.volume = Math.min(vol, 0.4);
                 if (vol >= 0.4) clearInterval(fadeIn);
             }, 150);
-        }).catch(() => {
-            console.log("Autoplay bloqueado. Esperando interacción...");
-        });
+        }).catch(() => {});
     }
 
-    // Al venir del dashboard (clic), el navegador suele permitir el audio
     window.addEventListener('load', playSemaphore);
     document.addEventListener('click', () => { if(audio.paused) playSemaphore(); }, {once: true});
 
-    // 2. Temporizador de 60 segundos
     const countdown = setInterval(() => {
         timeLeft--;
         document.getElementById('seconds').innerText = timeLeft;
         if (timeLeft <= 0) {
             clearInterval(countdown);
-            window.location.href = "/"; // Redirigir a la landing al acabar
+            window.location.href = "/";
         }
     }, 1000);
 
-    // 3. Posicionamiento de "Constelación" de fotos
+    // LISTADO AMPLIADO A 15 POSICIONES
     const photos = document.querySelectorAll('.photo-orbit');
     const positions = [
-        { w: 140, h: 100, x: 10, y: 15 }, { w: 100, h: 140, x: 80, y: 10 },
-        { w: 120, h: 120, x: 15, y: 70 }, { w: 150, h: 100, x: 75, y: 75 },
-        { w: 90, h: 130, x: 5, y: 45 },  { w: 110, h: 110, x: 85, y: 40 },
-        { w: 130, h: 90, x: 45, y: 5 },  { w: 100, h: 100, x: 45, y: 85 },
-        { w: 120, h: 160, x: 25, y: 10 }, { w: 140, h: 100, x: 65, y: 15 },
-        { w: 80, h: 120, x: 20, y: 85 }, { w: 100, h: 140, x: 70, y: 85 }
+        { w: 140, h: 100, x: 8,  y: 12 }, { w: 100, h: 140, x: 82, y: 8 },
+        { w: 120, h: 120, x: 12, y: 72 }, { w: 150, h: 100, x: 78, y: 78 },
+        { w: 90, h: 130,  x: 4,  y: 42 }, { w: 110, h: 110, x: 88, y: 45 },
+        { w: 130, h: 90,  x: 42, y: 4 },  { w: 100, h: 100, x: 48, y: 88 },
+        { w: 120, h: 160, x: 26, y: 8 },  { w: 140, h: 100, x: 62, y: 12 },
+        { w: 80,  h: 120, x: 22, y: 82 }, { w: 100, h: 140, x: 72, y: 84 },
+        // Nuevas posiciones para las fotos 13, 14 y 15
+        { w: 115, h: 145, x: 90, y: 22 }, { w: 135, h: 105, x: 2,  y: 65 },
+        { w: 125, h: 125, x: 55, y: 82 }
     ];
 
     photos.forEach((photo, i) => {
         const pos = positions[i];
+        if(!pos) return; // Seguridad por si acaso
+        
         photo.style.width = pos.w + 'px';
         photo.style.height = pos.h + 'px';
         photo.style.left = pos.x + '%';
         photo.style.top = pos.y + '%';
         
-        // Movimiento flotante individual
         let angle = Math.random() * Math.PI * 2;
         setInterval(() => {
-            angle += 0.01;
-            const ox = Math.cos(angle) * 15;
-            const oy = Math.sin(angle) * 15;
+            angle += 0.008; // Un poco más lento para que sea más elegante
+            const ox = Math.cos(angle) * 12;
+            const oy = Math.sin(angle) * 12;
             photo.style.transform = `translate(${ox}px, ${oy}px)`;
         }, 30);
     });
