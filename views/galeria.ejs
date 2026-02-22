@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camilo & Víctor · Gracias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Orbitron:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --gold: #c9a96e;
+            --gold-dim: rgba(201,169,110,0.15);
+            --white: #f5f0e8;
+            --white-dim: rgba(245,240,232,0.06);
+            --border: rgba(201,169,110,0.15);
+        }
+
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: #080608;
+            font-family: 'Cormorant Garamond', serif;
+            color: var(--white);
+            cursor: default;
+        }
+
+        /* ── GRAIN OVERLAY ── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 1000;
+            pointer-events: none;
+            opacity: 0.035;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        }
+
+        /* ── FONDO NEBULOSA ── */
+        .nebula {
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 20% 30%, rgba(100,60,20,0.18) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 60% at 80% 70%, rgba(40,20,60,0.2) 0%, transparent 70%),
+                radial-gradient(ellipse 80% 40% at 50% 100%, rgba(201,169,110,0.06) 0%, transparent 60%);
+        }
+
+        /* ── CANVAS NUBE ── */
+        #canvas {
+            position: fixed; inset: 0; z-index: 1;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+            padding: 32px 40px 0;
+            display: flex; align-items: flex-start; justify-content: space-between;
+            opacity: 0;
+            animation: fadeUp 2s ease 0.5s forwards;
+        }
+
+        .header-brand {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.5rem; font-weight: 300;
+            letter-spacing: 0.35em; text-transform: uppercase;
+            color: rgba(201,169,110,0.5);
+        }
+
+        .header-date {
+            font-style: italic;
+            font-size: 0.85rem; font-weight: 300;
+            color: rgba(245,240,232,0.25);
+            letter-spacing: 0.05em;
+        }
+
+        /* ── TÍTULO CENTRAL ── */
+        .title-block {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            text-align: center;
+            pointer-events: none;
+            opacity: 0;
+            animation: fadeUp 2.5s ease 0.8s forwards;
+        }
+
+        .title-eyebrow {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.48rem; font-weight: 300;
+            letter-spacing: 0.4em; text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 16px;
+            opacity: 0.7;
+        }
+
+        .title-main {
+            font-size: clamp(2.8rem, 6vw, 5rem);
+            font-weight: 300;
+            font-style: italic;
+            line-height: 1.1;
+            color: var(--white);
+            letter-spacing: 0.02em;
+            margin-bottom: 20px;
+        }
+
+        .title-main em {
+            font-style: normal;
+            color: var(--gold);
+        }
+
+        .title-sub {
+            font-size: clamp(0.8rem, 1.5vw, 1rem);
+            font-weight: 300;
+            color: rgba(245,240,232,0.35);
+            letter-spacing: 0.15em;
+            font-style: italic;
+        }
+
+        .title-line {
+            width: 1px; height: 40px;
+            background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+            margin: 20px auto;
+            opacity: 0.4;
+        }
+
+        /* ── FOTO FLOTANTE ── */
+        .photo-item {
+            position: fixed;
+            border-radius: 2px;
+            overflow: hidden;
+            cursor: pointer;
+            z-index: 5;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, opacity 0.4s ease;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,169,110,0.08);
+        }
+
+        .photo-item::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(201,169,110,0.08) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .photo-item img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: saturate(0.7) brightness(0.85);
+            transition: filter 0.4s ease;
+        }
+
+        .photo-item:hover {
+            transform: scale(1.18) translateZ(0) !important;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.8), 0 0 0 1px rgba(201,169,110,0.3), 0 0 30px rgba(201,169,110,0.1);
+            z-index: 20 !important;
+        }
+
+        .photo-item:hover img {
+            filter: saturate(1) brightness(1);
+        }
+
+        /* ── LIGHTBOX ── */
+        .lightbox {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(8,6,8,0.95);
+            display: none; align-items: center; justify-content: center;
+            padding: 40px;
+            backdrop-filter: blur(20px);
+        }
+
+        .lightbox.open { display: flex; animation: fadeIn 0.3s ease; }
+
+        .lightbox img {
+            max-width: 90vw; max-height: 85vh;
+            object-fit: contain;
+            border-radius: 2px;
+            box-shadow: 0 20px 80px rgba(0,0,0,0.9);
+            filter: saturate(0.85);
+        }
+
+        .lightbox-close {
+            position: fixed; top: 24px; right: 32px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.5rem; letter-spacing: 0.3em;
+            color: rgba(201,169,110,0.5);
+            cursor: pointer; background: none; border: none;
+            text-transform: uppercase;
+            transition: color 0.2s;
+        }
+        .lightbox-close:hover { color: var(--gold); }
+
+        /* ── FOOTER ── */
+        .footer {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+            padding: 0 40px 28px;
+            display: flex; align-items: flex-end; justify-content: space-between;
+            opacity: 0;
+            animation: fadeUp 2s ease 1.2s forwards;
+        }
+
+        .footer-msg {
+            font-style: italic;
+            font-size: clamp(0.75rem, 1.2vw, 0.9rem);
+            color: rgba(245,240,232,0.2);
+            max-width: 320px;
+            line-height: 1.6;
+        }
+
+        .audio-control {
+            display: flex; align-items: center; gap: 10px;
+            cursor: pointer;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.45rem; letter-spacing: 0.25em;
+            color: rgba(201,169,110,0.4);
+            text-transform: uppercase;
+            transition: color 0.2s;
+            background: none; border: none;
+        }
+        .audio-control:hover { color: var(--gold); }
+
+        .audio-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--gold);
+            opacity: 0.4;
+            animation: pulse 2s infinite;
+        }
+        .audio-control.playing .audio-dot { opacity: 1; }
+
+        /* ── VIGNETTE ── */
+        .vignette {
+            position: fixed; inset: 0; z-index: 2;
+            pointer-events: none;
+            background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(8,6,8,0.7) 100%);
+        }
+
+        /* ── ANIMACIONES ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; } to { opacity: 1; }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.4); opacity: 1; }
+        }
+
+        /* ── MOBILE ── */
+        @media (max-width: 600px) {
+            .title-block { display: none; }
+            .header { padding: 20px; }
+            .footer { padding: 0 20px 20px; }
+            .footer-msg { font-size: 0.7rem; max-width: 200px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="nebula"></div>
+<div class="vignette"></div>
+
+<canvas id="canvas"></canvas>
+
+<!-- HEADER -->
+<header class="header">
+    <div class="header-brand">Camilo & Víctor · 2026–2027</div>
+    <div class="header-date">Momentos que nos trajeron hasta aquí</div>
+</header>
+
+<!-- TÍTULO -->
+<div class="title-block" id="titleBlock">
+    <div class="title-eyebrow">Una historia</div>
+    <h1 class="title-main">Gracias por<br>estar <em>aquí</em></h1>
+    <div class="title-line"></div>
+    <p class="title-sub">Cada uno de vosotros es parte de esto</p>
+</div>
+
+<!-- FOTOS FLOTANTES -->
+<% 
+const photos = [];
+for(let i = 1; i <= 15; i++) {
+    photos.push(`/images/galeria/img${String(i).padStart(2,'0')}.jpg`);
+}
+%>
+
+<% photos.forEach((src, idx) => { %>
+<div class="photo-item" id="photo-<%= idx %>" onclick="openLightbox('<%= src %>')">
+    <img src="<%= src %>" alt="Foto <%= idx + 1 %>" loading="lazy">
+</div>
+<% }); %>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()">✕ cerrar</button>
+    <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <p class="footer-msg">Que la música os acompañe mientras recordáis lo que hemos vivido juntos.</p>
+    <button class="audio-control" id="audioBtn" onclick="toggleAudio()">
+        <span class="audio-dot"></span>
+        <span id="audioLabel">Semaphore</span>
+    </button>
+</footer>
+
+<!-- AUDIO -->
+<audio id="audio" loop>
+    <source src="/audio/semaphore.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+// ── FOTOS: POSICIONAMIENTO FLOTANTE ──
+const photos = document.querySelectorAll('.photo-item');
+const totalPhotos = photos.length;
+
+// Configuración de cada foto — tamaño y posición inicial
+const photoConfigs = [
+    { w: 160, h: 110, x: 5,  y: 8  },
+    { w: 130, h: 170, x: 18, y: 55 },
+    { w: 150, h: 100, x: 3,  y: 72 },
+    { w: 120, h: 150, x: 28, y: 15 },
+    { w: 180, h: 120, x: 72, y: 5  },
+    { w: 140, h: 190, x: 85, y: 40 },
+    { w: 160, h: 110, x: 78, y: 72 },
+    { w: 130, h: 130, x: 60, y: 80 },
+    { w: 110, h: 150, x: 45, y: 70 },
+    { w: 150, h: 100, x: 40, y: 5  },
+    { w: 120, h: 160, x: 55, y: 20 },
+    { w: 140, h: 110, x: 10, y: 30 },
+    { w: 130, h: 170, x: 88, y: 10 },
+    { w: 160, h: 120, x: 20, y: 82 },
+    { w: 110, h: 140, x: 65, y: 55 },
+];
+
+// Animación flotante — cada foto tiene su propio ciclo
+const floatData = photoConfigs.map((cfg, i) => ({
+    ...cfg,
+    speedX: (Math.random() - 0.5) * 0.008,
+    speedY: (Math.random() - 0.5) * 0.006,
+    offsetX: Math.random() * Math.PI * 2,
+    offsetY: Math.random() * Math.PI * 2,
+    amplitude: 8 + Math.random() * 12,
+}));
+
+let time = 0;
+
+function animatePhotos() {
+    time += 0.008;
+    floatData.forEach((data, i) => {
+        const el = photos[i];
+        if (!el) return;
+        const px = data.x + Math.sin(time + data.offsetX) * (data.amplitude / window.innerWidth * 100);
+        const py = data.y + Math.cos(time + data.offsetY) * (data.amplitude / window.innerHeight * 100);
+        el.style.left = `${px}%`;
+        el.style.top  = `${py}%`;
+        el.style.width  = `${data.w}px`;
+        el.style.height = `${data.h}px`;
+    });
+    requestAnimationFrame(animatePhotos);
+}
+
+// Init fotos
+floatData.forEach((data, i) => {
+    const el = photos[i];
+    if (!el) return;
+    el.style.left   = `${data.x}%`;
+    el.style.top    = `${data.y}%`;
+    el.style.width  = `${data.w}px`;
+    el.style.height = `${data.h}px`;
+    el.style.opacity = '0';
+    el.style.transition = `opacity 1s ease ${0.3 + i * 0.12}s, transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease`;
+    setTimeout(() => { el.style.opacity = '1'; }, 100);
+});
+
+animatePhotos();
+
+// ── TÍTULO — desaparece al hacer scroll o touch ──
+let titleVisible = true;
+const titleBlock = document.getElementById('titleBlock');
+
+function hideTitle() {
+    if (titleVisible) {
+        titleVisible = false;
+        titleBlock.style.transition = 'opacity 1.5s ease';
+        titleBlock.style.opacity = '0';
+        setTimeout(() => { titleBlock.style.display = 'none'; }, 1500);
+    }
+}
+
+setTimeout(hideTitle, 5000); // desaparece solo a los 5s
+document.addEventListener('mousemove', hideTitle, { once: true });
+document.addEventListener('touchstart', hideTitle, { once: true });
+
+// ── LIGHTBOX ──
+function openLightbox(src) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+// ── AUDIO ──
+const audio = document.getElementById('audio');
+const audioBtn = document.getElementById('audioBtn');
+let audioStarted = false;
+
+audio.volume = 0;
+
+function fadeInAudio() {
+    audio.play().then(() => {
+        let vol = 0;
+        const fade = setInterval(() => {
+            vol = Math.min(vol + 0.02, 0.55);
+            audio.volume = vol;
+            if (vol >= 0.55) clearInterval(fade);
+        }, 100);
+        audioBtn.classList.add('playing');
+        document.getElementById('audioLabel').textContent = 'Sonando';
+        audioStarted = true;
+    }).catch(() => {});
+}
+
+function toggleAudio() {
+    if (!audioStarted) {
+        fadeInAudio();
+    } else if (audio.paused) {
+        audio.play();
+        audioBtn.classList.add('playing');
+        document.getElementById('audioLabel').textContent = 'Sonando';
+    } else {
+        audio.pause();
+        audioBtn.classList.remove('playing');
+        document.getElementById('audioLabel').textContent = 'Semaphore';
+    }
+}
+
+// Autoplay al primer toque/click
+document.addEventListener('click', () => {
+    if (!audioStarted) fadeInAudio();
+}, { once: true });
+document.addEventListener('touchstart', () => {
+    if (!audioStarted) fadeInAudio();
+}, { once: true });
+
+// ── MOBILE: reorganizar fotos para pantallas pequeñas ──
+function adjustForMobile() {
+    if (window.innerWidth < 600) {
+        floatData.forEach((data, i) => {
+            data.w = Math.round(data.w * 0.65);
+            data.h = Math.round(data.h * 0.65);
+        });
+    }
+}
+adjustForMobile();
+</script>
+</body>
+</html>

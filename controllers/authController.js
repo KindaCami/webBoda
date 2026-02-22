@@ -27,10 +27,11 @@ const authController = {
         }
     },
 
-    logout: (req, res) => {
-        req.session.destroy();
-        res.redirect('/');
-    },
+   logout: (req, res) => {
+    req.session.visited = true;
+    req.session.user = null;
+    res.redirect('/galeria');
+},
 
     showDashboard: async (req, res) => {
         if (!req.session.user) return res.redirect('/');

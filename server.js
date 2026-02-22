@@ -29,6 +29,12 @@ app.use('/game',  require('./routes/gameRoutes'));
 app.use('/admin', require('./routes/adminRoutes'));
 app.use('/',      require('./routes/authRoutes'));
 
+// Galería post-logout
+app.get('/galeria', (req, res) => {
+    if (!req.session.visited) return res.redirect('/');
+    res.render('galeria');
+});
+
 // 4. Arrancar servidor
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor MVC arrancado en http://localhost:${PORT}`);
