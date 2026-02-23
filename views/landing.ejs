@@ -813,7 +813,7 @@ fetch('/game/ranking').then(r=>r.json()).then(ranking => {
         return;
     }
     const medals = ['🥇','🥈','🥉'];
-    el.innerHTML = ranking.slice(0,3).map((r,i) => `
+    el.innerHTML = ranking.map((r,i) => `
         <div style="display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:4px; padding:10px 14px;">
             <span style="font-size:1.1rem;">${medals[i]}</span>
             <span style="flex:1; font-family:'Orbitron',monospace; font-size:0.7rem; color:#fff;">${r.player_name}</span>
