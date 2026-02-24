@@ -558,6 +558,9 @@
             font-size: 0.6rem; letter-spacing: 0.2em;
             color: var(--text-dim);
         }
+        #landing-top3::-webkit-scrollbar { width: 4px; }
+        #landing-top3::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 2px; }
+        #landing-top3::-webkit-scrollbar-thumb { background: rgba(0,255,136,0.3); border-radius: 2px; }
 
         /* ── ANIMACIONES ── */
         @keyframes fadeUp {
@@ -798,7 +801,7 @@
     <!-- TOP 3 RANKING -->
         <div id="landing-ranking" style="margin: 24px 0; display:flex; flex-direction:column; gap:8px;">
         <div style="font-family:'Orbitron',monospace; font-size:0.55rem; letter-spacing:0.25em; color:rgba(255,255,255,0.25); margin-bottom:4px;">🏆 RANKING ACTUAL</div>
-        <div id="landing-top3" style="display:flex; flex-direction:column; gap:6px;">
+        <div id="landing-top3" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; padding-right:4px;">
         <div style="color:rgba(255,255,255,0.2); font-size:0.8rem; font-style:italic;">Cargando ranking...</div>
         </div>
     </div>
