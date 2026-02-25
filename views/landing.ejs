@@ -799,14 +799,11 @@
         <p class="game-desc">Demuestra cuánto sabes sobre Víctor y Camilo. 10 preguntas, 3 vidas y un ranking entre todos los invitados.</p>
 
     <!-- TOP 3 RANKING -->
-        <div id="landing-ranking" style="margin: 24px 0; display:flex; flex-direction:column; gap:8px;">
-        <div style="font-family:'Orbitron',monospace; font-size:0.55rem; letter-spacing:0.25em; color:rgba(255,255,255,0.25); margin-bottom:4px;">🏆 RANKING ACTUAL</div>
-        <div id="landing-top3" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; padding-right:4px;">
-        <div style="color:rgba(255,255,255,0.2); font-size:0.8rem; font-style:italic;">Cargando ranking...</div>
-        </div>
-    </div>
-    <a href="/game" class="btn-primary" style="display:inline-block; margin-top:8px;">🎮 Jugar ahora →</a>
-</div>
+  <div style="margin: 24px 0; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:4px; padding:20px 24px; text-align:center;">
+  <div style="font-family:'Orbitron',monospace; font-size:0.55rem; letter-spacing:0.25em; color:rgba(255,255,255,0.25); margin-bottom:12px;">🏆 RANKING</div>
+    <p style="font-size:0.85rem; color:rgba(255,255,255,0.35); font-style:italic; line-height:1.6;">El ranking completo de invitados está disponible<br>en tu <strong style="color:rgba(0,255,136,0.6);">área privada de invitado</strong>.</p>
+  </div>
+  <a href="/game" class="btn-primary" style="display:inline-block; margin-top:8px;">🎮 Jugar ahora →</a>
 
 <script>
 fetch('/game/ranking').then(r=>r.json()).then(ranking => {

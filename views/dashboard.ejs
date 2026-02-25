@@ -330,6 +330,35 @@
                 </div>
                 <span style="font-family:'Orbitron',monospace; font-size:0.6rem; color:#ff00cc;">Jugar →</span>
                 </a>
+                <!-- RANKING DEL JUEGO -->
+    <div style="margin-bottom: 24px;">
+    <div style="font-family:'Orbitron',monospace; font-size:0.58rem; letter-spacing:0.22em; color:rgba(255,255,255,0.3); text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:10px;">🏆 Ranking invitados <span style="flex:1; height:1px; background:rgba(255,255,255,0.06); display:block;"></span></div>
+    <div id="dash-ranking" style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; padding-right:4px;">
+    <div style="color:rgba(255,255,255,0.2); font-size:0.8rem; font-style:italic;">Cargando...</div>
+    </div>
+    </div>
+<style>
+#dash-ranking::-webkit-scrollbar { width: 4px; }
+#dash-ranking::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+#dash-ranking::-webkit-scrollbar-thumb { background: rgba(0,255,136,0.3); border-radius: 2px; }
+</style>
+<script>
+fetch('/game/ranking').then(r=>r.json()).then(ranking => {
+    const el = document.getElementById('dash-ranking');
+    if (!ranking.length) {
+        el.innerHTML = '<div style="color:rgba(255,255,255,0.2); font-size:0.8rem; font-style:italic;">Sé el primero en jugar 🚀</div>';
+        return;
+    }
+    const medals = ['🥇','🥈','🥉'];
+    el.innerHTML = ranking.map((r,i) => `
+        <div style="display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:4px; padding:10px 14px;">
+            <span style="font-size:1rem; font-family:'Orbitron',monospace; color:rgba(255,255,255,0.3); min-width:28px; text-align:center;">${medals[i] || '#'+(i+1)}</span>
+            <span style="flex:1; font-family:'Orbitron',monospace; font-size:0.7rem; color:#fff;">${r.player_name}</span>
+            <span style="font-family:'Orbitron',monospace; font-size:0.7rem; color:#00ff88; font-weight:700;">${parseInt(r.score).toLocaleString()} pts</span>
+        </div>
+    `).join('');
+}).catch(() => {});
+</script>
 
                 <form action="/confirmar-asistencia" method="POST">
 
