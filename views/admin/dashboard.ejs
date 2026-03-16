@@ -292,19 +292,17 @@
 
         <%
         const IVA = 1.10;
-        const fmt = (n) => n.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
+        const fmt = (v) => v.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
+        const ni = (v) => parseInt(v) || 0;
 
-        // Personas que asisten al SÁBADO por tipo de edad
-        const adSab   = stats.adultos_sabado      || 0;
-        const adolSab = stats.adolescentes_sabado  || 0;
-        const ninSab  = stats.ninos_sabado         || 0;
+        const adSab    = ni(stats.adultos_sabado);
+        const adolSab  = ni(stats.adolescentes_sabado);
+        const ninSab   = ni(stats.ninos_sabado);
         const totalSab = adSab + adolSab + ninSab;
 
-        // Solo sábado sin dormir
-        const soloSab = stats.solo_sabado || 0;
+        const soloSab = ni(stats.solo_sabado);
 
-        // Alojamiento
-        const totalDuermen = stats.acc_friday || 0;  // personas que marcan al menos una noche
+        const totalDuermen = ni(stats.confirmed_acc) + ni(stats.waiting_acc);
         const CAMAS_TEJERA = 100;
         const sinCama = Math.max(0, totalDuermen - CAMAS_TEJERA);
 
