@@ -302,7 +302,7 @@
 
         const soloSab = ni(stats.solo_sabado);
 
-        const totalDuermen = ni(stats.confirmed_acc) + ni(stats.waiting_acc);
+        const totalDuermen = ni(stats.total_duermen);
         const CAMAS_TEJERA = 100;
         const sinCama = Math.max(0, totalDuermen - CAMAS_TEJERA);
 
@@ -368,18 +368,6 @@
             <div class="eco-card-title">🎉 Servicios principales · Sábado 22 Mayo 2027</div>
 
             <div class="eco-row">
-                <span class="eco-label">Adultos confirmados sábado</span>
-                <span class="eco-value"><%= adSab %> personas</span>
-            </div>
-            <div class="eco-row">
-                <span class="eco-label">Adolescentes confirmados sábado (12-17)</span>
-                <span class="eco-value"><%= adolSab %> personas</span>
-            </div>
-            <div class="eco-row">
-                <span class="eco-label">Niños confirmados sábado (6-12)</span>
-                <span class="eco-value"><%= ninSab %> personas</span>
-            </div>
-            <div class="eco-row" style="border-top:1px solid rgba(255,255,255,0.08); margin-top:4px; padding-top:12px;">
                 <span class="eco-label">Adultos+adolescentes facturados <% if(diferencia > 0) { %><span style="color:var(--orange)">(mín. 100 · +<%= diferencia %> vacíos)</span><% } %></span>
                 <span class="eco-value"><%= adultosFacturados %> × 166€</span>
             </div>

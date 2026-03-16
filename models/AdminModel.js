@@ -45,9 +45,12 @@ const AdminModel = {
 
                 -- Solo sábado sin dormir (sábado confirmado, sin noche viernes ni sábado)
                 SUM(CASE WHEN attending_saturday_2027 = 1
-                         AND (accommodation_friday  = 0 OR accommodation_friday  IS NULL)
-                         AND (accommodation_saturday = 0 OR accommodation_saturday IS NULL)
-                    THEN 1 ELSE 0 END) AS solo_sabado
+                         AND accommodation_friday  = 0
+                         AND accommodation_saturday = 0
+                    THEN 1 ELSE 0 END) AS solo_sabado,
+
+                -- Total personas que quieren dormir al menos una noche
+                SUM(CASE WHEN accommodation_friday = 1 OR accommodation_saturday = 1 THEN 1 ELSE 0 END) AS total_duermen
 
             FROM guests
         `);
