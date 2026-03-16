@@ -17,7 +17,6 @@
                               radial-gradient(ellipse at 90% 80%, rgba(0,136,255,0.03) 0%, transparent 50%);
         }
 
-        /* ── NAV ── */
         .admin-nav {
             position: sticky; top: 0; z-index: 100;
             background: rgba(0,0,0,0.95); backdrop-filter: blur(20px);
@@ -36,19 +35,17 @@
         .btn-logout-nav { font-family: 'Orbitron', monospace; font-size: 0.55rem; letter-spacing: 0.15em; color: rgba(255,60,60,0.6); text-decoration: none; padding: 6px 10px; border: 1px solid rgba(255,60,60,0.2); border-radius: 3px; transition: color 0.2s, border-color 0.2s; }
         .btn-logout-nav:hover { color: var(--red); border-color: rgba(255,60,60,0.5); }
 
-        /* ── LAYOUT ── */
         .page { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
 
         .flash { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 3px; margin-bottom: 24px; font-size: 0.85rem; }
         .flash-success { background: rgba(0,255,136,0.07); border: 1px solid rgba(0,255,136,0.2); border-left: 3px solid var(--green); color: var(--green); }
         .flash-error   { background: rgba(255,60,60,0.07); border: 1px solid rgba(255,60,60,0.2); border-left: 3px solid var(--red); color: #ff7070; }
 
-        /* ── SECTION HEADER ── */
         .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
         .section-title { font-family: 'Orbitron', monospace; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
         .section-divider { height: 1px; background: var(--border); margin: 36px 0; }
 
-        /* ── STAT CARDS ── */
+        /* STAT CARDS */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 32px; }
         .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 20px; position: relative; overflow: hidden; }
         .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
@@ -61,18 +58,38 @@
         .stat-label { font-family: 'Orbitron', monospace; font-size: 0.52rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 10px; }
         .stat-value { font-family: 'Orbitron', monospace; font-size: 2rem; font-weight: 900; color: #fff; line-height: 1; }
         .stat-sub { font-size: 0.75rem; color: rgba(255,255,255,0.3); margin-top: 6px; }
-
-        /* Camas progress */
         .beds-bar { margin-top: 8px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
         .beds-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
 
-        /* ── GRÁFICAS ── */
+        /* CHARTS */
         .charts-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px; }
         .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; }
         .chart-title { font-family: 'Orbitron', monospace; font-size: 0.58rem; letter-spacing: 0.2em; color: rgba(255,255,255,0.35); text-transform: uppercase; margin-bottom: 16px; }
         .chart-wrap { position: relative; height: 160px; }
 
-        /* ── TABLA INVITADOS ── */
+        /* ECONOMÍA */
+        .economia-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .eco-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; }
+        .eco-card-title { font-family: 'Orbitron', monospace; font-size: 0.58rem; letter-spacing: 0.2em; color: rgba(255,255,255,0.35); text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .eco-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.82rem; }
+        .eco-row:last-child { border-bottom: none; }
+        .eco-label { color: rgba(255,255,255,0.5); }
+        .eco-value { font-family: 'Orbitron', monospace; font-size: 0.8rem; font-weight: 700; color: #fff; }
+        .eco-total { display: flex; justify-content: space-between; align-items: center; padding: 14px 0 0; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .eco-total-label { font-family: 'Orbitron', monospace; font-size: 0.6rem; letter-spacing: 0.15em; color: var(--green); }
+        .eco-total-value { font-family: 'Orbitron', monospace; font-size: 1.4rem; font-weight: 900; color: var(--green); }
+        .eco-note { font-size: 0.7rem; color: rgba(255,255,255,0.2); margin-top: 6px; font-style: italic; }
+        .eco-warn { background: rgba(255,165,0,0.07); border: 1px solid rgba(255,165,0,0.2); border-left: 3px solid var(--orange); border-radius: 3px; padding: 12px 16px; font-size: 0.82rem; color: var(--orange); margin-bottom: 16px; }
+        .eco-breakdown { background: rgba(255,255,255,0.02); border-radius: 3px; padding: 12px; margin-top: 12px; }
+        .eco-breakdown-row { display: flex; justify-content: space-between; font-size: 0.75rem; padding: 3px 0; }
+        .eco-breakdown-label { color: rgba(255,255,255,0.4); }
+        .eco-breakdown-value { color: rgba(255,255,255,0.7); font-family: 'Orbitron', monospace; font-size: 0.7rem; }
+
+        /* SOLO SABADO */
+        .solo-sabado-card { background: var(--surface); border: 1px solid rgba(255,215,0,0.2); border-left: 3px solid var(--gold); border-radius: 4px; padding: 20px; margin-bottom: 16px; }
+        .solo-sabado-title { font-family: 'Orbitron', monospace; font-size: 0.58rem; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 12px; }
+
+        /* TABLE */
         .table-controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
         .search-input { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 3px; padding: 8px 14px; color: #fff; font-family: 'Inter', sans-serif; font-size: 0.85rem; outline: none; width: 240px; transition: border-color 0.2s; }
         .search-input:focus { border-color: rgba(0,255,136,0.4); }
@@ -96,7 +113,6 @@
         .td-name { font-weight: 600; color: #fff; }
         .td-group { font-size: 0.75rem; color: rgba(255,255,255,0.35); }
 
-        /* Badges */
         .badge { display: inline-block; font-family: 'Orbitron', monospace; font-size: 0.48rem; letter-spacing: 0.1em; padding: 2px 7px; border-radius: 2px; font-weight: 700; }
         .badge-si      { background: rgba(0,255,136,0.12); color: var(--green); }
         .badge-no      { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.2); }
@@ -105,8 +121,10 @@
         .badge-wait    { background: rgba(255,165,0,0.1); color: var(--orange); border: 1px solid rgba(255,165,0,0.2); }
         .badge-none    { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.07); }
         .badge-menu    { background: rgba(0,136,255,0.1); color: var(--blue); }
+        .badge-adulto  { background: rgba(0,255,136,0.08); color: var(--green); border: 1px solid rgba(0,255,136,0.15); }
+        .badge-adol    { background: rgba(255,165,0,0.08); color: var(--orange); border: 1px solid rgba(255,165,0,0.15); }
+        .badge-nino    { background: rgba(255,0,204,0.08); color: var(--pink); border: 1px solid rgba(255,0,204,0.15); }
 
-        /* ── ALERGIAS ── */
         .allergy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
         .allergy-card { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--orange); border-radius: 4px; padding: 16px; }
         .allergy-name { font-weight: 600; color: #fff; margin-bottom: 4px; }
@@ -114,15 +132,12 @@
         .allergy-detail { font-size: 0.8rem; color: rgba(255,255,255,0.6); line-height: 1.5; }
         .allergy-tag { display: inline-block; font-size: 0.7rem; padding: 2px 8px; border-radius: 2px; margin-bottom: 4px; }
 
-        /* ── LISTA ESPERA ── */
         .waiting-table td, .waiting-table th { padding: 8px 12px; }
 
-        /* ── SETTINGS ── */
         .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; max-width: 400px; }
         .settings-row { display: flex; gap: 10px; align-items: flex-end; margin-top: 12px; }
         .settings-row input { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 3px; padding: 10px 14px; color: #fff; font-family: 'Orbitron', monospace; font-size: 1rem; font-weight: 700; width: 100px; outline: none; text-align: center; }
 
-        /* ── MODAL EDICIÓN ── */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; display: none; align-items: center; justify-content: center; padding: 24px; }
         .modal-overlay.open { display: flex; }
         .modal { background: #0d0d1a; border: 1px solid var(--border); border-radius: 4px; width: 100%; max-width: 480px; overflow: hidden; }
@@ -138,11 +153,11 @@
         .btn-cancel { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px solid var(--border); }
 
         @media (max-width: 900px) {
-            .charts-grid { grid-template-columns: 1fr 1fr; }
+            .charts-grid, .economia-grid { grid-template-columns: 1fr 1fr; }
             .stats-grid { grid-template-columns: repeat(3, 1fr); }
         }
         @media (max-width: 600px) {
-            .charts-grid { grid-template-columns: 1fr; }
+            .charts-grid, .economia-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .admin-nav { padding: 0 16px; }
             .nav-links { display: none; }
@@ -151,14 +166,14 @@
 </head>
 <body>
 
-<!-- ── NAV ── -->
 <nav class="admin-nav">
     <span class="nav-brand">✦ ADMIN · BODA</span>
     <div class="nav-links">
-        <a href="#stats"   class="nav-link active">Stats</a>
-        <a href="#guests"  class="nav-link">Invitados</a>
-        <a href="#allergy" class="nav-link">Alergias</a>
-        <a href="#waiting" class="nav-link">Espera</a>
+        <a href="#stats"    class="nav-link active">Stats</a>
+        <a href="#economia" class="nav-link">Economía</a>
+        <a href="#guests"   class="nav-link">Invitados</a>
+        <a href="#allergy"  class="nav-link">Alergias</a>
+        <a href="#waiting"  class="nav-link">Espera</a>
         <a href="#settings" class="nav-link">Config</a>
     </div>
     <div class="nav-right">
@@ -188,6 +203,21 @@
                 <div class="stat-value"><%= stats.total_guests || 0 %></div>
                 <div class="stat-sub"><%= stats.confirmed_guests || 0 %> han confirmado</div>
             </div>
+            <div class="stat-card stat-green">
+                <div class="stat-label">Adultos</div>
+                <div class="stat-value"><%= stats.total_adultos || 0 %></div>
+                <div class="stat-sub">166€ paquete principal</div>
+            </div>
+            <div class="stat-card stat-orange">
+                <div class="stat-label">Adolescentes</div>
+                <div class="stat-value" style="color:var(--orange)"><%= stats.total_adolescentes || 0 %></div>
+                <div class="stat-sub">12–17 años · 150,5€</div>
+            </div>
+            <div class="stat-card stat-pink">
+                <div class="stat-label">Niños</div>
+                <div class="stat-value" style="color:var(--pink)"><%= stats.total_ninos || 0 %></div>
+                <div class="stat-sub">0–11 años · 48,5€</div>
+            </div>
             <div class="stat-card stat-gold">
                 <div class="stat-label">Ceremonia 2026</div>
                 <div class="stat-value"><%= stats.ceremony_2026 || 0 %></div>
@@ -196,7 +226,7 @@
             <div class="stat-card stat-blue">
                 <div class="stat-label">Viernes 2027</div>
                 <div class="stat-value"><%= stats.friday_2027 || 0 %></div>
-                <div class="stat-sub">Cena de bienvenida</div>
+                <div class="stat-sub">Cena bienvenida</div>
             </div>
             <div class="stat-card stat-pink">
                 <div class="stat-label">Sábado 2027</div>
@@ -247,8 +277,180 @@
             <div class="chart-wrap"><canvas id="chartMenus"></canvas></div>
         </div>
         <div class="chart-card">
-            <div class="chart-title">Noches de alojamiento</div>
-            <div class="chart-wrap"><canvas id="chartNoches"></canvas></div>
+            <div class="chart-title">Distribución por edad</div>
+            <div class="chart-wrap"><canvas id="chartEdades"></canvas></div>
+        </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- ══ ECONOMÍA ══ -->
+    <div id="economia">
+        <div class="section-head">
+            <span class="section-title">✦ Estimación económica · Tejera Negra 2027</span>
+        </div>
+
+        <%
+        // Precios del contrato (sin IVA)
+        const IVA = 1.10;
+        const sat = stats.saturday_2027 || 0;
+
+        // Contadores por tipo (sábado)
+        const adSab   = stats.adultos_sabado   || 0;
+        const adolSab = stats.adolescentes_sabado || 0;
+        const ninSab  = stats.ninos_sabado      || 0;
+
+        // Personas solo sábado sin dormir
+        const soloSab = stats.solo_sabado || 0;
+
+        // Viernes
+        const adVie   = stats.adultos_viernes   || 0;
+        const adolVie = stats.adolescentes_viernes || 0;
+        const ninVie  = stats.ninos_viernes      || 0;
+
+        // Domingo
+        const adDom   = stats.adultos_domingo   || 0;
+        const adolDom = stats.adolescentes_domingo || 0;
+        const ninDom  = stats.ninos_domingo      || 0;
+
+        // ── SERVICIOS PRINCIPALES (mínimo 100 adultos facturados) ──
+        const adultosFacturados = Math.max(adSab + adolSab, 100);
+        const paqueteAdulto    = 166;
+        const paqueteAdol      = 150.5; // cóctel 17 + banquete 118 + barra 15.5
+        const paqueteNino      = 48.5;
+
+        const costePrincipal = (adultosFacturados * paqueteAdulto) + (ninSab * paqueteNino);
+        const costePrincipalIVA = costePrincipal * IVA;
+
+        // ── CENA VIERNES (opcional) ──
+        const precioViernes = 21;
+        const costeViernes = (adVie + adolVie) * precioViernes;
+        const costeViernesIVA = costeViernes * IVA;
+
+        // ── DESAYUNO SÁBADO (opcional) ──
+        const precioDesayuno = 5;
+        const costeDesayuno = (adSab + adolSab + ninSab) * precioDesayuno;
+        const costeDesayunoIVA = costeDesayuno * IVA;
+
+        // ── BRUNCH DOMINGO (opcional) ──
+        const precioBrunch = 20;
+        const precioBrunchNino = 10;
+        const costeBrunch = (adDom + adolDom) * precioBrunch + ninDom * precioBrunchNino;
+        const costeBrunchIVA = costeBrunch * IVA;
+
+        // ── TOTAL ──
+        const totalSinIVA = costePrincipal + costeViernes + costeDesayuno + costeBrunch;
+        const totalConIVA = totalSinIVA * IVA;
+
+        const fmt = (n) => n.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
+        %>
+
+        <% if (adSab + adolSab < 100) { %>
+        <div class="eco-warn">
+            ⚠ Actualmente hay <strong><%= adSab + adolSab %></strong> adultos/adolescentes confirmados para el sábado.
+            Se factura un mínimo de <strong>100 adultos</strong> — diferencia: <strong><%= 100 - (adSab + adolSab) %></strong> personas.
+        </div>
+        <% } %>
+
+        <!-- Solo sábado sin dormir -->
+        <div class="solo-sabado-card">
+            <div class="solo-sabado-title">⚡ Solo sábado · sin alojamiento</div>
+            <div style="display:flex; gap:32px; flex-wrap:wrap;">
+                <div>
+                    <div style="font-family:'Orbitron',monospace; font-size:2rem; font-weight:900; color:var(--gold)"><%= soloSab %></div>
+                    <div style="font-size:0.75rem; color:rgba(255,255,255,0.4); margin-top:4px;">personas que vienen solo el sábado sin dormir<br>ni el viernes ni el sábado</div>
+                </div>
+                <div style="font-size:0.82rem; color:rgba(255,255,255,0.4); line-height:1.8; align-self:center;">
+                    Asisten al sábado · No marcan noche viernes · No marcan noche sábado
+                </div>
+            </div>
+        </div>
+
+        <div class="economia-grid">
+
+            <!-- SERVICIOS PRINCIPALES -->
+            <div class="eco-card">
+                <div class="eco-card-title">🎉 Servicios principales · Sábado</div>
+                <div class="eco-row">
+                    <span class="eco-label">Adultos (<%= adSab %> · mín. 100 facturados)</span>
+                    <span class="eco-value"><%= fmt(adultosFacturados * paqueteAdulto) %></span>
+                </div>
+                <div class="eco-row">
+                    <span class="eco-label">Niños 6-12 (<%= ninSab %> × 48,5€)</span>
+                    <span class="eco-value"><%= fmt(ninSab * paqueteNino) %></span>
+                </div>
+                <div class="eco-row">
+                    <span class="eco-label">Adolescentes incluidos en adultos</span>
+                    <span class="eco-value" style="color:rgba(255,255,255,0.3)">—</span>
+                </div>
+                <div class="eco-breakdown">
+                    <div class="eco-breakdown-row"><span class="eco-breakdown-label">Cóctel adultos (17€/p)</span><span class="eco-breakdown-value"><%= fmt(adultosFacturados * 17) %></span></div>
+                    <div class="eco-breakdown-row"><span class="eco-breakdown-label">Banquete adultos (118€/p)</span><span class="eco-breakdown-value"><%= fmt(adultosFacturados * 118) %></span></div>
+                    <div class="eco-breakdown-row"><span class="eco-breakdown-label">Barra libre adultos (31€/p)</span><span class="eco-breakdown-value"><%= fmt(adultosFacturados * 31) %></span></div>
+                    <div class="eco-breakdown-row"><span class="eco-breakdown-label">Adolescentes barra libre (15,5€/p)</span><span class="eco-breakdown-value"><%= fmt(adolSab * 15.5) %></span></div>
+                </div>
+                <div class="eco-total">
+                    <span class="eco-total-label">Sin IVA</span>
+                    <span class="eco-total-value"><%= fmt(costePrincipal) %></span>
+                </div>
+                <div class="eco-total" style="padding-top:6px; margin-top:0; border-top:none;">
+                    <span style="font-family:'Orbitron',monospace; font-size:0.55rem; color:rgba(255,255,255,0.3)">Con IVA (10%)</span>
+                    <span style="font-family:'Orbitron',monospace; font-size:1rem; font-weight:700; color:rgba(0,255,136,0.6)"><%= fmt(costePrincipalIVA) %></span>
+                </div>
+                <p class="eco-note">Montaje estándar ceremonia civil incluido · Mínimo 100 adultos facturado</p>
+            </div>
+
+            <!-- SERVICIOS OPCIONALES -->
+            <div class="eco-card">
+                <div class="eco-card-title">✦ Servicios opcionales</div>
+
+                <div class="eco-row">
+                    <span class="eco-label">🍽 Cena viernes (<%= adVie + adolVie %> pax × 21€)</span>
+                    <span class="eco-value"><%= fmt(costeViernes) %></span>
+                </div>
+                <div class="eco-row">
+                    <span class="eco-label">☕ Desayuno sábado (<%= adSab + adolSab + ninSab %> pax × 5€)</span>
+                    <span class="eco-value"><%= fmt(costeDesayuno) %></span>
+                </div>
+                <div class="eco-row">
+                    <span class="eco-label">🥂 Brunch domingo adultos (<%= adDom + adolDom %> × 20€)</span>
+                    <span class="eco-value"><%= fmt((adDom + adolDom) * precioBrunch) %></span>
+                </div>
+                <div class="eco-row">
+                    <span class="eco-label">🥂 Brunch domingo niños (<%= ninDom %> × 10€)</span>
+                    <span class="eco-value"><%= fmt(ninDom * precioBrunchNino) %></span>
+                </div>
+                <div class="eco-total">
+                    <span class="eco-total-label">Opcionales sin IVA</span>
+                    <span class="eco-total-value"><%= fmt(costeViernes + costeDesayuno + costeBrunch) %></span>
+                </div>
+                <div class="eco-total" style="padding-top:6px; margin-top:0; border-top:none;">
+                    <span style="font-family:'Orbitron',monospace; font-size:0.55rem; color:rgba(255,255,255,0.3)">Con IVA (10%)</span>
+                    <span style="font-family:'Orbitron',monospace; font-size:1rem; font-weight:700; color:rgba(0,255,136,0.6)"><%= fmt((costeViernes + costeDesayuno + costeBrunch) * IVA) %></span>
+                </div>
+                <p class="eco-note">Desayuno y brunch pendientes de confirmar · Niños 0-5 gratis en cena y brunch</p>
+            </div>
+
+        </div>
+
+        <!-- TOTAL GENERAL -->
+        <div class="eco-card" style="border-color: rgba(0,255,136,0.2); border-left: 3px solid var(--green);">
+            <div class="eco-card-title" style="color: var(--green);">💰 Total estimado · Tejera Negra 2027</div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; margin-top:8px;">
+                <div style="text-align:center; padding:16px; background:rgba(255,255,255,0.02); border-radius:4px;">
+                    <div style="font-family:'Orbitron',monospace; font-size:0.55rem; color:rgba(255,255,255,0.3); margin-bottom:8px;">SIN IVA</div>
+                    <div style="font-family:'Orbitron',monospace; font-size:1.4rem; font-weight:900; color:#fff"><%= fmt(totalSinIVA) %></div>
+                </div>
+                <div style="text-align:center; padding:16px; background:rgba(0,255,136,0.04); border-radius:4px; border:1px solid rgba(0,255,136,0.15);">
+                    <div style="font-family:'Orbitron',monospace; font-size:0.55rem; color:var(--green); margin-bottom:8px;">CON IVA (10%)</div>
+                    <div style="font-family:'Orbitron',monospace; font-size:1.8rem; font-weight:900; color:var(--green)"><%= fmt(totalConIVA) %></div>
+                </div>
+                <div style="text-align:center; padding:16px; background:rgba(255,255,255,0.02); border-radius:4px;">
+                    <div style="font-family:'Orbitron',monospace; font-size:0.55rem; color:rgba(255,255,255,0.3); margin-bottom:8px;">POR PERSONA</div>
+                    <div style="font-family:'Orbitron',monospace; font-size:1.4rem; font-weight:900; color:#fff"><%= sat > 0 ? fmt(totalConIVA / sat) : '—' %></div>
+                </div>
+            </div>
+            <p class="eco-note" style="margin-top:12px;">⚠ Estimación basada en confirmaciones actuales · No incluye servicios extra (DJ, maestro de ceremonias, decoración, derechos SGAE/AGEDI, toallas 1,5€/p, etc.)</p>
         </div>
     </div>
 
@@ -270,6 +472,7 @@
                     <tr>
                         <th>Nombre</th>
                         <th>Grupo</th>
+                        <th>Edad</th>
                         <th>Email</th>
                         <th>Cer'26</th>
                         <th>Vie'27</th>
@@ -290,6 +493,12 @@
                                 <% if (group.is_vip) { %><span class="badge badge-vip">VIP</span><% } %>
                             </td>
                             <td class="td-group"><%= group.group_name %></td>
+                            <td>
+                                <% const ag = guest.age_group || 'adulto'; %>
+                                <span class="badge <%= ag === 'adulto' ? 'badge-adulto' : ag === 'adolescente' ? 'badge-adol' : 'badge-nino' %>">
+                                    <%= ag === 'adulto' ? '👤 Adulto' : ag === 'adolescente' ? '🧑 Adol.' : '👶 Niño' %>
+                                </span>
+                            </td>
                             <td style="font-size:0.75rem; color:rgba(255,255,255,0.4)"><%= guest.email || '—' %></td>
                             <td><span class="badge <%= guest.attending_ceremony_2026 ? 'badge-si' : 'badge-no' %>"><%= guest.attending_ceremony_2026 ? 'Sí' : 'No' %></span></td>
                             <td><span class="badge <%= guest.attending_friday_2027 ? 'badge-si' : 'badge-no' %>"><%= guest.attending_friday_2027 ? 'Sí' : 'No' %></span></td>
@@ -314,6 +523,7 @@
                                         onclick="openEdit(<%= JSON.stringify({
                                             id: guest.id,
                                             fullname: guest.fullname,
+                                            age_group: guest.age_group || 'adulto',
                                             email: guest.email || '',
                                             menu_type: guest.menu_type || 'estandar',
                                             allergies: guest.allergies_specifications || '',
@@ -381,12 +591,7 @@
             <table class="waiting-table">
                 <thead>
                     <tr>
-                        <th>Nombre</th>
-                        <th>Grupo</th>
-                        <th>Email</th>
-                        <th>N. Viernes</th>
-                        <th>N. Sábado</th>
-                        <th>N. Domingo</th>
+                        <th>Nombre</th><th>Grupo</th><th>Email</th><th>N. Viernes</th><th>N. Sábado</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -397,7 +602,6 @@
                         <td style="font-size:0.75rem; color:rgba(255,255,255,0.4)"><%= w.email || '—' %></td>
                         <td><span class="badge <%= w.accommodation_friday ? 'badge-wait' : 'badge-no' %>"><%= w.accommodation_friday ? '⏳' : '—' %></span></td>
                         <td><span class="badge <%= w.accommodation_saturday ? 'badge-wait' : 'badge-no' %>"><%= w.accommodation_saturday ? '⏳' : '—' %></span></td>
-                        <td><span class="badge <%= w.accommodation_sunday ? 'badge-wait' : 'badge-no' %>"><%= w.accommodation_sunday ? '⏳' : '—' %></span></td>
                     </tr>
                     <% }); %>
                 </tbody>
@@ -440,6 +644,14 @@
                     <input type="text" name="fullname" id="edit-fullname" required>
                 </div>
                 <div class="modal-field">
+                    <label>Grupo de edad</label>
+                    <select name="age_group" id="edit-age-group">
+                        <option value="adulto">👤 Adulto (18+)</option>
+                        <option value="adolescente">🧑 Adolescente (12–17)</option>
+                        <option value="nino">👶 Niño (0–11)</option>
+                    </select>
+                </div>
+                <div class="modal-field">
                     <label>Email</label>
                     <input type="email" name="email" id="edit-email">
                 </div>
@@ -470,7 +682,6 @@
 </div>
 
 <script>
-// ── BÚSQUEDA ──
 document.getElementById('searchInput').addEventListener('input', function() {
     const q = this.value.toLowerCase();
     document.querySelectorAll('#guestTable tbody tr').forEach(row => {
@@ -478,10 +689,10 @@ document.getElementById('searchInput').addEventListener('input', function() {
     });
 });
 
-// ── MODAL ──
 function openEdit(guest) {
     document.getElementById('edit-id').value = guest.id;
     document.getElementById('edit-fullname').value = guest.fullname;
+    document.getElementById('edit-age-group').value = guest.age_group || 'adulto';
     document.getElementById('edit-email').value = guest.email;
     document.getElementById('edit-menu').value = guest.menu_type;
     document.getElementById('edit-allergies').value = guest.allergies;
@@ -494,13 +705,11 @@ document.getElementById('editModal').addEventListener('click', function(e) {
     if (e.target === this) closeEdit();
 });
 
-// ── GRÁFICAS ──
 const chartDefaults = {
     responsive: true, maintainAspectRatio: false,
     plugins: { legend: { labels: { color: 'rgba(255,255,255,0.5)', font: { size: 11 }, boxWidth: 12 } } }
 };
 
-// Eventos
 new Chart(document.getElementById('chartEventos'), {
     type: 'bar',
     data: {
@@ -517,35 +726,27 @@ new Chart(document.getElementById('chartEventos'), {
     }}
 });
 
-// Menús
 const menuData = <%- JSON.stringify(menuStats) %>;
-const menuLabels = menuData.map(m => m.menu_type || 'estándar');
-const menuValues = menuData.map(m => m.total);
 new Chart(document.getElementById('chartMenus'), {
     type: 'doughnut',
     data: {
-        labels: menuLabels,
-        datasets: [{ data: menuValues, backgroundColor: ['rgba(0,136,255,0.8)', 'rgba(0,255,136,0.8)', 'rgba(255,215,0,0.8)', 'rgba(255,0,204,0.8)'], borderWidth: 0 }]
+        labels: menuData.map(m => m.menu_type || 'estándar'),
+        datasets: [{ data: menuData.map(m => m.total), backgroundColor: ['rgba(0,136,255,0.8)', 'rgba(0,255,136,0.8)', 'rgba(255,215,0,0.8)', 'rgba(255,0,204,0.8)'], borderWidth: 0 }]
     },
     options: { ...chartDefaults, cutout: '65%' }
 });
 
-// Noches
-new Chart(document.getElementById('chartNoches'), {
-    type: 'bar',
+new Chart(document.getElementById('chartEdades'), {
+    type: 'doughnut',
     data: {
-        labels: ['Noche Viernes', 'Noche Sábado', 'Noche Domingo'],
-        datasets: [{
-            label: 'Personas',
-            data: [<%= stats.acc_friday||0 %>, <%= stats.acc_saturday||0 %>, <%= stats.accommodation_sunday||0 %>],
-            backgroundColor: ['rgba(0,255,136,0.7)', 'rgba(0,136,255,0.7)', 'rgba(255,0,204,0.7)'],
-            borderRadius: 3, borderWidth: 0
+        labels: ['Adultos', 'Adolescentes', 'Niños'],
+        datasets: [{ 
+            data: [<%= stats.total_adultos||0 %>, <%= stats.total_adolescentes||0 %>, <%= stats.total_ninos||0 %>],
+            backgroundColor: ['rgba(0,255,136,0.8)', 'rgba(255,165,0,0.8)', 'rgba(255,0,204,0.8)'],
+            borderWidth: 0
         }]
     },
-    options: { ...chartDefaults, plugins: { legend: { display: false } }, scales: {
-        x: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-        y: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' }, beginAtZero: true }
-    }}
+    options: { ...chartDefaults, cutout: '65%' }
 });
 </script>
 </body>

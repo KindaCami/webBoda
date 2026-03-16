@@ -2,13 +2,11 @@ const pool = require('../db');
 
 const AdminModel = {
 
-    // Login
     async getByUsername(username) {
         const [rows] = await pool.query('SELECT * FROM admins WHERE username = ?', [username]);
         return rows[0];
     },
 
-    // Estadísticas generales
     async getStats() {
         const [[totals]] = await pool.query(`
             SELECT
@@ -23,7 +21,34 @@ const AdminModel = {
                 SUM(accommodation_sunday)     AS acc_sunday,
                 SUM(CASE WHEN accommodation_status = 'confirmed_free' THEN 1 ELSE 0 END) AS confirmed_acc,
                 SUM(CASE WHEN accommodation_status = 'waiting_list'   THEN 1 ELSE 0 END) AS waiting_acc,
-                SUM(CASE WHEN confirmed_at IS NOT NULL THEN 1 ELSE 0 END) AS confirmed_guests
+                SUM(CASE WHEN confirmed_at IS NOT NULL THEN 1 ELSE 0 END) AS confirmed_guests,
+
+                -- Totales por edad (todos)
+                SUM(CASE WHEN age_group = 'adulto'      THEN 1 ELSE 0 END) AS total_adultos,
+                SUM(CASE WHEN age_group = 'adolescente' THEN 1 ELSE 0 END) AS total_adolescentes,
+                SUM(CASE WHEN age_group = 'nino'        THEN 1 ELSE 0 END) AS total_ninos,
+
+                -- Sábado por edad
+                SUM(CASE WHEN attending_saturday_2027 = 1 AND age_group = 'adulto'      THEN 1 ELSE 0 END) AS adultos_sabado,
+                SUM(CASE WHEN attending_saturday_2027 = 1 AND age_group = 'adolescente' THEN 1 ELSE 0 END) AS adolescentes_sabado,
+                SUM(CASE WHEN attending_saturday_2027 = 1 AND age_group = 'nino'        THEN 1 ELSE 0 END) AS ninos_sabado,
+
+                -- Viernes por edad
+                SUM(CASE WHEN attending_friday_2027 = 1 AND age_group = 'adulto'      THEN 1 ELSE 0 END) AS adultos_viernes,
+                SUM(CASE WHEN attending_friday_2027 = 1 AND age_group = 'adolescente' THEN 1 ELSE 0 END) AS adolescentes_viernes,
+                SUM(CASE WHEN attending_friday_2027 = 1 AND age_group = 'nino'        THEN 1 ELSE 0 END) AS ninos_viernes,
+
+                -- Domingo por edad
+                SUM(CASE WHEN attending_sunday_2027 = 1 AND age_group = 'adulto'      THEN 1 ELSE 0 END) AS adultos_domingo,
+                SUM(CASE WHEN attending_sunday_2027 = 1 AND age_group = 'adolescente' THEN 1 ELSE 0 END) AS adolescentes_domingo,
+                SUM(CASE WHEN attending_sunday_2027 = 1 AND age_group = 'nino'        THEN 1 ELSE 0 END) AS ninos_domingo,
+
+                -- Solo sábado sin dormir (sábado confirmado, sin noche viernes ni sábado)
+                SUM(CASE WHEN attending_saturday_2027 = 1
+                         AND (accommodation_friday  = 0 OR accommodation_friday  IS NULL)
+                         AND (accommodation_saturday = 0 OR accommodation_saturday IS NULL)
+                    THEN 1 ELSE 0 END) AS solo_sabado
+
             FROM guests
         `);
 
@@ -36,7 +61,6 @@ const AdminModel = {
         return totals;
     },
 
-    // Conteo de menús
     async getMenuStats() {
         const [rows] = await pool.query(`
             SELECT menu_type, COUNT(*) AS total
@@ -46,12 +70,11 @@ const AdminModel = {
         return rows;
     },
 
-    // Todos los grupos con sus invitados
     async getAllGroups() {
         const [rows] = await pool.query(`
             SELECT
                 ig.id AS group_id, ig.group_name, ig.access_code, ig.is_vip, ig.max_members,
-                g.id, g.fullname, g.email,
+                g.id, g.fullname, g.email, g.age_group,
                 g.attending_ceremony_2026, g.attending_friday_2027,
                 g.attending_saturday_2027, g.attending_sunday_2027,
                 g.accommodation_friday, g.accommodation_saturday, g.accommodation_sunday,
@@ -63,7 +86,6 @@ const AdminModel = {
             ORDER BY ig.id, g.id
         `);
 
-        // Agrupar por grupo
         const groups = {};
         rows.forEach(row => {
             if (!groups[row.group_id]) {
@@ -81,6 +103,7 @@ const AdminModel = {
                     id: row.id,
                     fullname: row.fullname,
                     email: row.email,
+                    age_group: row.age_group || 'adulto',
                     attending_ceremony_2026: row.attending_ceremony_2026,
                     attending_friday_2027: row.attending_friday_2027,
                     attending_saturday_2027: row.attending_saturday_2027,
@@ -100,7 +123,6 @@ const AdminModel = {
         return Object.values(groups);
     },
 
-    // Invitados con alergias
     async getAllergies() {
         const [rows] = await pool.query(`
             SELECT g.fullname, ig.group_name, g.menu_type, g.allergies_specifications, g.observations
@@ -114,7 +136,6 @@ const AdminModel = {
         return rows;
     },
 
-    // Lista de espera
     async getWaitingList() {
         const [rows] = await pool.query(`
             SELECT g.fullname, g.email, ig.group_name,
@@ -127,12 +148,11 @@ const AdminModel = {
         return rows;
     },
 
-    // Datos para CSV
     async getAllForCSV() {
         const [rows] = await pool.query(`
             SELECT
                 ig.group_name, ig.is_vip,
-                g.fullname, g.email,
+                g.fullname, g.email, g.age_group,
                 g.attending_ceremony_2026, g.attending_friday_2027,
                 g.attending_saturday_2027, g.attending_sunday_2027,
                 g.accommodation_friday, g.accommodation_saturday, g.accommodation_sunday,
@@ -146,22 +166,20 @@ const AdminModel = {
         return rows;
     },
 
-    // Actualizar invitado
     async updateGuest(id, data) {
         await pool.query(`
             UPDATE guests SET
-                fullname = ?, email = ?, menu_type = ?,
+                fullname = ?, age_group = ?, email = ?, menu_type = ?,
                 allergies_specifications = ?, observations = ?
             WHERE id = ?
-        `, [data.fullname, data.email, data.menu_type, data.allergies, data.observations, id]);
+        `, [data.fullname, data.age_group || 'adulto', data.email, data.menu_type,
+            data.allergies, data.observations, id]);
     },
 
-    // Eliminar invitado
     async deleteGuest(id) {
         await pool.query('DELETE FROM guests WHERE id = ?', [id]);
     },
 
-    // Actualizar camas disponibles
     async updateMaxSpots(value) {
         await pool.query(
             "UPDATE settings SET setting_value = ? WHERE setting_key = 'max_accommodation_spots'",
