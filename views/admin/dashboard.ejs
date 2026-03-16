@@ -291,166 +291,126 @@
         </div>
 
         <%
-        // Precios del contrato (sin IVA)
         const IVA = 1.10;
-        const sat = stats.saturday_2027 || 0;
+        const fmt = (n) => n.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
 
-        // Contadores por tipo (sábado)
-        const adSab   = stats.adultos_sabado   || 0;
-        const adolSab = stats.adolescentes_sabado || 0;
-        const ninSab  = stats.ninos_sabado      || 0;
+        // Personas que asisten al SÁBADO por tipo de edad
+        const adSab   = stats.adultos_sabado      || 0;
+        const adolSab = stats.adolescentes_sabado  || 0;
+        const ninSab  = stats.ninos_sabado         || 0;
+        const totalSab = adSab + adolSab + ninSab;
 
-        // Personas solo sábado sin dormir
+        // Solo sábado sin dormir
         const soloSab = stats.solo_sabado || 0;
 
-        // Viernes
-        const adVie   = stats.adultos_viernes   || 0;
-        const adolVie = stats.adolescentes_viernes || 0;
-        const ninVie  = stats.ninos_viernes      || 0;
+        // Alojamiento
+        const totalDuermen = stats.acc_friday || 0;  // personas que marcan al menos una noche
+        const CAMAS_TEJERA = 100;
+        const sinCama = Math.max(0, totalDuermen - CAMAS_TEJERA);
 
-        // Domingo
-        const adDom   = stats.adultos_domingo   || 0;
-        const adolDom = stats.adolescentes_domingo || 0;
-        const ninDom  = stats.ninos_domingo      || 0;
+        // ── SERVICIOS PRINCIPALES ──
+        // Mínimo 100 adultos+adolescentes facturados
+        const adultosYAdolSab = adSab + adolSab;
+        const adultosFacturados = Math.max(adultosYAdolSab, 100);
 
-        // ── SERVICIOS PRINCIPALES (mínimo 100 adultos facturados) ──
-        const adultosFacturados = Math.max(adSab + adolSab, 100);
-        const paqueteAdulto    = 166;
-        const paqueteAdol      = 150.5; // cóctel 17 + banquete 118 + barra 15.5
-        const paqueteNino      = 48.5;
+        // Precios por persona (sin IVA), del contrato
+        // Adulto: cóctel 17 + banquete 118 + barra libre 31 = 166€
+        // Adolescente: cóctel 17 + banquete 118 + barra libre 15.5 = 150.5€
+        // Niño 6-12: paquete infantil 48.5€
+        // Niño 0-5: gratis
 
-        const costePrincipal = (adultosFacturados * paqueteAdulto) + (ninSab * paqueteNino);
-        const costePrincipalIVA = costePrincipal * IVA;
+        // Tejera factura adultos+adolescentes juntos al precio adulto (mín 100)
+        // más niños al precio infantil
+        const ninoPagante = ninSab; // todos los niños del sábado (asumimos 6-12, ajustar manualmente si hay 0-5)
 
-        // ── CENA VIERNES (opcional) ──
-        const precioViernes = 21;
-        const costeViernes = (adVie + adolVie) * precioViernes;
-        const costeViernesIVA = costeViernes * IVA;
+        const costePrincipalSinIVA = (adultosFacturados * 166) + (ninoPagante * 48.5);
+        const costePrincipalConIVA = costePrincipalSinIVA * IVA;
 
-        // ── DESAYUNO SÁBADO (opcional) ──
-        const precioDesayuno = 5;
-        const costeDesayuno = (adSab + adolSab + ninSab) * precioDesayuno;
-        const costeDesayunoIVA = costeDesayuno * IVA;
-
-        // ── BRUNCH DOMINGO (opcional) ──
-        const precioBrunch = 20;
-        const precioBrunchNino = 10;
-        const costeBrunch = (adDom + adolDom) * precioBrunch + ninDom * precioBrunchNino;
-        const costeBrunchIVA = costeBrunch * IVA;
-
-        // ── TOTAL ──
-        const totalSinIVA = costePrincipal + costeViernes + costeDesayuno + costeBrunch;
-        const totalConIVA = totalSinIVA * IVA;
-
-        const fmt = (n) => n.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
+        // Desglose
+        const costeAdultos  = adultosFacturados * 166;
+        const costeNinos    = ninoPagante * 48.5;
+        const diferencia    = adultosFacturados - adultosYAdolSab; // personas de relleno hasta mín 100
         %>
 
-        <% if (adSab + adolSab < 100) { %>
+        <!-- ALERTA MÍNIMO 100 -->
+        <% if (adultosYAdolSab < 100) { %>
         <div class="eco-warn">
-            ⚠ Actualmente hay <strong><%= adSab + adolSab %></strong> adultos/adolescentes confirmados para el sábado.
-            Se factura un mínimo de <strong>100 adultos</strong> — diferencia: <strong><%= 100 - (adSab + adolSab) %></strong> personas.
+            ⚠ Solo hay <strong><%= adultosYAdolSab %></strong> adultos+adolescentes confirmados para el sábado.
+            Tejera Negra factura mínimo <strong>100</strong> — pagaréis <strong><%= diferencia %> personas extra</strong> aunque no vengan.
         </div>
         <% } %>
 
-        <!-- Solo sábado sin dormir -->
+        <!-- ALERTA ALOJAMIENTO EXTERNO -->
+        <% if (sinCama > 0) { %>
+        <div class="eco-warn" style="border-left-color: var(--red); color: var(--red); background: rgba(255,60,60,0.07); border-color: rgba(255,60,60,0.2);">
+            🛏 <strong><%= totalDuermen %></strong> personas quieren dormir pero Tejera Negra solo tiene <strong><%= CAMAS_TEJERA %></strong> camas incluidas.
+            Hay <strong><%= sinCama %> personas sin cama</strong> — necesitas buscarles alojamiento externo.
+        </div>
+        <% } %>
+
+        <!-- SOLO SÁBADO SIN DORMIR -->
         <div class="solo-sabado-card">
             <div class="solo-sabado-title">⚡ Solo sábado · sin alojamiento</div>
             <div style="display:flex; gap:32px; flex-wrap:wrap;">
                 <div>
                     <div style="font-family:'Orbitron',monospace; font-size:2rem; font-weight:900; color:var(--gold)"><%= soloSab %></div>
-                    <div style="font-size:0.75rem; color:rgba(255,255,255,0.4); margin-top:4px;">personas que vienen solo el sábado sin dormir<br>ni el viernes ni el sábado</div>
+                    <div style="font-size:0.75rem; color:rgba(255,255,255,0.4); margin-top:4px;">personas confirmadas el sábado<br>sin noche del viernes ni del sábado</div>
                 </div>
-                <div style="font-size:0.82rem; color:rgba(255,255,255,0.4); line-height:1.8; align-self:center;">
-                    Asisten al sábado · No marcan noche viernes · No marcan noche sábado
+                <div style="font-size:0.82rem; color:rgba(255,255,255,0.4); line-height:2; align-self:center; border-left:1px solid rgba(255,255,255,0.08); padding-left:24px;">
+                    <div>Total sábado: <strong style="color:#fff"><%= totalSab %></strong></div>
+                    <div>Duermen en Tejera: <strong style="color:#fff"><%= totalDuermen %></strong></div>
+                    <div>Solo vienen el día: <strong style="color:var(--gold)"><%= soloSab %></strong></div>
+                    <% if (sinCama > 0) { %><div>Sin cama asignada: <strong style="color:var(--red)"><%= sinCama %></strong></div><% } %>
                 </div>
             </div>
         </div>
 
-        <div class="economia-grid">
+        <!-- SERVICIOS PRINCIPALES -->
+        <div class="eco-card" style="border-color: rgba(0,255,136,0.15);">
+            <div class="eco-card-title">🎉 Servicios principales · Sábado 22 Mayo 2027</div>
 
-            <!-- SERVICIOS PRINCIPALES -->
-            <div class="eco-card">
-                <div class="eco-card-title">🎉 Servicios principales · Sábado</div>
-                <div class="eco-row">
-                    <span class="eco-label">Adultos (<%= adSab %> · mín. 100 facturados)</span>
-                    <span class="eco-value"><%= fmt(adultosFacturados * paqueteAdulto) %></span>
-                </div>
-                <div class="eco-row">
-                    <span class="eco-label">Niños 6-12 (<%= ninSab %> × 48,5€)</span>
-                    <span class="eco-value"><%= fmt(ninSab * paqueteNino) %></span>
-                </div>
-                <div class="eco-row">
-                    <span class="eco-label">Adolescentes incluidos en adultos</span>
-                    <span class="eco-value" style="color:rgba(255,255,255,0.3)">—</span>
-                </div>
-                <div class="eco-breakdown">
-                    <div class="eco-breakdown-row"><span class="eco-breakdown-label">Cóctel adultos (17€/p)</span><span class="eco-breakdown-value"><%= fmt(adultosFacturados * 17) %></span></div>
-                    <div class="eco-breakdown-row"><span class="eco-breakdown-label">Banquete adultos (118€/p)</span><span class="eco-breakdown-value"><%= fmt(adultosFacturados * 118) %></span></div>
-                    <div class="eco-breakdown-row"><span class="eco-breakdown-label">Barra libre adultos (31€/p)</span><span class="eco-breakdown-value"><%= fmt(adultosFacturados * 31) %></span></div>
-                    <div class="eco-breakdown-row"><span class="eco-breakdown-label">Adolescentes barra libre (15,5€/p)</span><span class="eco-breakdown-value"><%= fmt(adolSab * 15.5) %></span></div>
-                </div>
-                <div class="eco-total">
-                    <span class="eco-total-label">Sin IVA</span>
-                    <span class="eco-total-value"><%= fmt(costePrincipal) %></span>
-                </div>
-                <div class="eco-total" style="padding-top:6px; margin-top:0; border-top:none;">
-                    <span style="font-family:'Orbitron',monospace; font-size:0.55rem; color:rgba(255,255,255,0.3)">Con IVA (10%)</span>
-                    <span style="font-family:'Orbitron',monospace; font-size:1rem; font-weight:700; color:rgba(0,255,136,0.6)"><%= fmt(costePrincipalIVA) %></span>
-                </div>
-                <p class="eco-note">Montaje estándar ceremonia civil incluido · Mínimo 100 adultos facturado</p>
+            <div class="eco-row">
+                <span class="eco-label">Adultos confirmados sábado</span>
+                <span class="eco-value"><%= adSab %> personas</span>
+            </div>
+            <div class="eco-row">
+                <span class="eco-label">Adolescentes confirmados sábado (12-17)</span>
+                <span class="eco-value"><%= adolSab %> personas</span>
+            </div>
+            <div class="eco-row">
+                <span class="eco-label">Niños confirmados sábado (6-12)</span>
+                <span class="eco-value"><%= ninSab %> personas</span>
+            </div>
+            <div class="eco-row" style="border-top:1px solid rgba(255,255,255,0.08); margin-top:4px; padding-top:12px;">
+                <span class="eco-label">Adultos+adolescentes facturados <% if(diferencia > 0) { %><span style="color:var(--orange)">(mín. 100 · +<%= diferencia %> vacíos)</span><% } %></span>
+                <span class="eco-value"><%= adultosFacturados %> × 166€</span>
+            </div>
+            <div class="eco-row">
+                <span class="eco-label">Niños menú infantil (6-12)</span>
+                <span class="eco-value"><%= ninoPagante %> × 48,5€</span>
             </div>
 
-            <!-- SERVICIOS OPCIONALES -->
-            <div class="eco-card">
-                <div class="eco-card-title">✦ Servicios opcionales</div>
-
-                <div class="eco-row">
-                    <span class="eco-label">🍽 Cena viernes (<%= adVie + adolVie %> pax × 21€)</span>
-                    <span class="eco-value"><%= fmt(costeViernes) %></span>
-                </div>
-                <div class="eco-row">
-                    <span class="eco-label">☕ Desayuno sábado (<%= adSab + adolSab + ninSab %> pax × 5€)</span>
-                    <span class="eco-value"><%= fmt(costeDesayuno) %></span>
-                </div>
-                <div class="eco-row">
-                    <span class="eco-label">🥂 Brunch domingo adultos (<%= adDom + adolDom %> × 20€)</span>
-                    <span class="eco-value"><%= fmt((adDom + adolDom) * precioBrunch) %></span>
-                </div>
-                <div class="eco-row">
-                    <span class="eco-label">🥂 Brunch domingo niños (<%= ninDom %> × 10€)</span>
-                    <span class="eco-value"><%= fmt(ninDom * precioBrunchNino) %></span>
-                </div>
-                <div class="eco-total">
-                    <span class="eco-total-label">Opcionales sin IVA</span>
-                    <span class="eco-total-value"><%= fmt(costeViernes + costeDesayuno + costeBrunch) %></span>
-                </div>
-                <div class="eco-total" style="padding-top:6px; margin-top:0; border-top:none;">
-                    <span style="font-family:'Orbitron',monospace; font-size:0.55rem; color:rgba(255,255,255,0.3)">Con IVA (10%)</span>
-                    <span style="font-family:'Orbitron',monospace; font-size:1rem; font-weight:700; color:rgba(0,255,136,0.6)"><%= fmt((costeViernes + costeDesayuno + costeBrunch) * IVA) %></span>
-                </div>
-                <p class="eco-note">Desayuno y brunch pendientes de confirmar · Niños 0-5 gratis en cena y brunch</p>
+            <div class="eco-breakdown">
+                <div style="font-family:'Orbitron',monospace; font-size:0.5rem; letter-spacing:0.15em; color:rgba(255,255,255,0.2); margin-bottom:8px;">DESGLOSE PAQUETE ADULTO (166€)</div>
+                <div class="eco-breakdown-row"><span class="eco-breakdown-label">Cóctel (17€/p)</span><span class="eco-breakdown-value"><%= fmt(adultosFacturados * 17) %></span></div>
+                <div class="eco-breakdown-row"><span class="eco-breakdown-label">Banquete (118€/p)</span><span class="eco-breakdown-value"><%= fmt(adultosFacturados * 118) %></span></div>
+                <div class="eco-breakdown-row"><span class="eco-breakdown-label">Barra libre 3h (31€/p)</span><span class="eco-breakdown-value"><%= fmt(adultosFacturados * 31) %></span></div>
+                <div class="eco-breakdown-row"><span class="eco-breakdown-label">Niños infantil (48,5€/p)</span><span class="eco-breakdown-value"><%= fmt(costeNinos) %></span></div>
+                <div class="eco-breakdown-row"><span class="eco-breakdown-label">Ceremonia civil estándar</span><span class="eco-breakdown-value">385,00 €</span></div>
             </div>
 
-        </div>
-
-        <!-- TOTAL GENERAL -->
-        <div class="eco-card" style="border-color: rgba(0,255,136,0.2); border-left: 3px solid var(--green);">
-            <div class="eco-card-title" style="color: var(--green);">💰 Total estimado · Tejera Negra 2027</div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; margin-top:8px;">
-                <div style="text-align:center; padding:16px; background:rgba(255,255,255,0.02); border-radius:4px;">
-                    <div style="font-family:'Orbitron',monospace; font-size:0.55rem; color:rgba(255,255,255,0.3); margin-bottom:8px;">SIN IVA</div>
-                    <div style="font-family:'Orbitron',monospace; font-size:1.4rem; font-weight:900; color:#fff"><%= fmt(totalSinIVA) %></div>
-                </div>
-                <div style="text-align:center; padding:16px; background:rgba(0,255,136,0.04); border-radius:4px; border:1px solid rgba(0,255,136,0.15);">
-                    <div style="font-family:'Orbitron',monospace; font-size:0.55rem; color:var(--green); margin-bottom:8px;">CON IVA (10%)</div>
-                    <div style="font-family:'Orbitron',monospace; font-size:1.8rem; font-weight:900; color:var(--green)"><%= fmt(totalConIVA) %></div>
-                </div>
-                <div style="text-align:center; padding:16px; background:rgba(255,255,255,0.02); border-radius:4px;">
-                    <div style="font-family:'Orbitron',monospace; font-size:0.55rem; color:rgba(255,255,255,0.3); margin-bottom:8px;">POR PERSONA</div>
-                    <div style="font-family:'Orbitron',monospace; font-size:1.4rem; font-weight:900; color:#fff"><%= sat > 0 ? fmt(totalConIVA / sat) : '—' %></div>
-                </div>
+            <div class="eco-total">
+                <span class="eco-total-label">Sin IVA</span>
+                <span class="eco-total-value"><%= fmt(costePrincipalSinIVA + 385) %></span>
             </div>
-            <p class="eco-note" style="margin-top:12px;">⚠ Estimación basada en confirmaciones actuales · No incluye servicios extra (DJ, maestro de ceremonias, decoración, derechos SGAE/AGEDI, toallas 1,5€/p, etc.)</p>
+            <div class="eco-total" style="padding-top:6px; margin-top:0; border-top:none;">
+                <span style="font-family:'Orbitron',monospace; font-size:0.55rem; color:rgba(255,255,255,0.3)">Con IVA (10%)</span>
+                <span style="font-family:'Orbitron',monospace; font-size:1.4rem; font-weight:900; color:var(--green)"><%= fmt((costePrincipalSinIVA + 385) * IVA) %></span>
+            </div>
+            <p class="eco-note" style="margin-top:8px;">
+                Incluye: cóctel + banquete + barra libre 3h + montaje ceremonia civil estándar + 1 noche alojamiento hasta 100 pax<br>
+                No incluye: DJ (470€), maestro de ceremonias, derechos SGAE/AGEDI, toallas (1,5€/p), servicios extras
+            </p>
         </div>
     </div>
 
