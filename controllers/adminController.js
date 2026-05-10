@@ -126,7 +126,55 @@ const adminController = {
             console.error(err);
             res.status(500).send('Error al exportar');
         }
+    },
+
+    // POST admin/email/indicaciones2026
+    enviarIndicaciones2026: async (req, res) => {
+    try {
+        const { Resend } = require('resend');
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const { emailIndicaciones2026 } = require('../services/emailIndicaciones2026');
+        const pool = require('../db');
+ 
+        // Obtener emails únicos de grupos con al menos un asistente a la ceremonia 2026
+        const [rows] = await pool.query(`
+            SELECT DISTINCT g.email
+            FROM guests g
+            WHERE g.attending_ceremony_2026 = 1
+              AND g.email IS NOT NULL
+              AND g.email != ''
+        `);
+ 
+        if (rows.length === 0) {
+            return res.redirect('/admin/dashboard?error=No+hay+emails+para+enviar');
+        }
+ 
+        const emails = ['camilofcovillg@gmail.com', 'lymkatsu@gmail.com'];
+        const html = emailIndicaciones2026();
+ 
+        // Enviar en paralelo con límite de rate
+        const resultados = await Promise.allSettled(
+            emails.map(to =>
+                resend.emails.send({
+                    from: 'Boda Camilo y Víctor <hola@bodacamiloyvictor.com>',
+                    to,
+                    subject: 'Boda Camilo y Víctor · Indicaciones Ceremonia 22 Mayo 2026',
+                    html
+                })
+            )
+        );
+ 
+        const enviados  = resultados.filter(r => r.status === 'fulfilled').length;
+        const fallidos  = resultados.filter(r => r.status === 'rejected').length;
+ 
+        console.log(`Indicaciones 2026: ${enviados} enviados, ${fallidos} fallidos`);
+        res.redirect(`/admin/dashboard?success=Emails+enviados:+${enviados}+de+${emails.length}`);
+ 
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin/dashboard?error=Error+al+enviar+emails');
     }
+}
 };
 
 module.exports = adminController;

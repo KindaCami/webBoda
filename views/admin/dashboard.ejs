@@ -61,6 +61,12 @@
         .beds-bar { margin-top: 8px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
         .beds-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
 
+        /*indicaciones boda */
+        <form action="/admin/email/indicaciones2026" method="POST" 
+        onsubmit="return confirm('¿Enviar indicaciones a todos los confirmados del 22 mayo?')">
+        <button type="submit" class="btn btn-pink">✉ Enviar indicaciones 2026</button>
+        </form>
+
         /* CHARTS */
         .charts-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px; }
         .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; }

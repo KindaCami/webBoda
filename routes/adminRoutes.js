@@ -20,4 +20,7 @@ router.post('/guest/edit/:id',        requireAdmin, adminController.editGuest);
 router.post('/guest/delete/:id',      requireAdmin, adminController.deleteGuest);
 router.post('/settings/spots',        requireAdmin, adminController.updateSpots);
 
+//Envio de indicaciones email
+router.post('/email/indicaciones2026', requireAdmin, adminController.enviarIndicaciones2026);
+
 module.exports = router;
