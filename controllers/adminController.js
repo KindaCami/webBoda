@@ -152,17 +152,18 @@ const adminController = {
         const emails = rows.map(r => r.email);
         const html = emailIndicaciones2026();
  
-        // Enviar en paralelo con límite de rate
-        const resultados = await Promise.allSettled(
-            emails.map(to =>
-                resend.emails.send({
-                    from: 'Boda Camilo y Víctor <hola@bodacamiloyvictor.com>',
-                    to,
-                    subject: 'Boda Camilo y Víctor · Indicaciones Ceremonia 22 Mayo 2026',
-                    html
-                })
-            )
-        );
+        // Enviar con delay entre emails
+        const resultados = [];
+        for (const to of emails) {
+            const r = await resend.emails.send({
+            from: 'Boda Camilo y Víctor <hola@bodacamiloyvictor.com>',
+            to,
+            subject: 'Boda Camilo y Víctor · Indicaciones Ceremonia 22 Mayo 2026',
+            html
+        });
+    resultados.push(r);
+    await new Promise(resolve => setTimeout(resolve, 600));
+}
  
         const enviados  = resultados.filter(r => r.status === 'fulfilled').length;
         const fallidos  = resultados.filter(r => r.status === 'rejected').length;
