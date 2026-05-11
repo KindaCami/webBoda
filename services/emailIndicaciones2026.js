@@ -79,7 +79,7 @@ const emailIndicaciones2026 = () => `
                         <div class="timeline-time">14:30 · COMIDA</div>
                         <div class="timeline-text">
                             Picoteo en 
-                            <a href="https://maps.app.goo.gl/msGwEZpD3MimZKv46" target="_blank">La Manduca/a>, 
+                            <a href="https://maps.app.goo.gl/msGwEZpD3MimZKv46" target="_blank">La Manduca</a>, 
                             en el barrio El Carmen de Madrid.
                         </div>
                     </div>
@@ -95,6 +95,18 @@ const emailIndicaciones2026 = () => `
                     Por protocolo del Ayuntamiento de Madrid es necesario llegar con tiempo. 
                     Os pedimos que estéis en la <strong style="color:#ffd700">Plaza de la Villa a las 11:30</strong> como máximo 
                     para poder ir caminando juntos y sin prisas hasta la Casa de la Panadería.
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- DRESS CODE -->
+            <div class="block">
+                <div class="block-title">👔 Dress code</div>
+                <div class="info-box">
+                    El dress code es <strong style="color:#ffd700">elegante no formal</strong> — venid guapos pero cómodos. 
+                    Nada de trajes de etiqueta ni corbatas obligatorias. Una camisa, un vestido, algo con estilo... 
+                    lo que os haga sentir bien. Eso sí, tened en cuenta que caminaremos por adoquines 😄
                 </div>
             </div>
 
@@ -148,9 +160,12 @@ const emailIndicaciones2026 = () => `
 
             <div class="divider"></div>
 
-            <div style="font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.8; font-style: italic; text-align: center;">
-                ¿Dudas? Escríbenos directamente o pregúntale a Sioux en vuestra área de invitado 🐶
+            <div style="background:rgba(0,136,255,0.07); border:1px solid rgba(0,136,255,0.15); border-left:3px solid #0088ff; border-radius:3px; padding:14px 16px; margin-bottom:16px; font-size:13px; color:rgba(255,255,255,0.7); line-height:1.7;">
+            📨 <strong style="color:#0088ff">Por favor, reenvía este email a todos los integrantes de tu grupo</strong> puesto que si estas leyendo esto tú eres su mensajero. Y si ves a alguien del grupo antes del día, recuérdaselo en persona también.
             </div>
+        <div style="font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.8; font-style: italic; text-align: center;">
+                ¿Dudas? Escríbenos directamente.
+        </div>
         </div>
 
         <div class="footer">
