@@ -149,7 +149,7 @@ const adminController = {
             return res.redirect('/admin/dashboard?error=No+hay+emails+para+enviar');
         }
  
-        const emails = ['camilofcovillg@gmail.com', 'lymkatsu@gmail.com'];
+        const emails = rows.map(r => r.email);
         const html = emailIndicaciones2026();
  
         // Enviar en paralelo con límite de rate
